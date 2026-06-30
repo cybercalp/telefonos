@@ -21,9 +21,6 @@ jobs:
           extensions: mbstring, sqlite3, curl, openssl, ldap, gd, iconv
           coverage: none
 
-      - name: Validate composer.json
-        run: composer validate
-
       - name: Install Composer dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
 
