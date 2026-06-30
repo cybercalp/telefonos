@@ -1,4 +1,7 @@
 {
+    "name": "cybercalp/telefonos",
+    "description": "Directorio Corporativo — PHP LDAP/Active Directory phonebook with Tailwind CSS + Alpine.js",
+    "license": "proprietary",
     "require": {
         "phpmailer/phpmailer": "^6.10",
         "dolondro/google-authenticator": "^2.2",
