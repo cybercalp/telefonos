@@ -6,20 +6,138 @@ use PHPUnit\Framework\TestCase;
 /**
  * Tests for lib/preventvalidpost.php
  *
- * NOTE: Full CSRF rejection path testing (invalid token → header()+exit) is limited
- * because the file calls exit() on invalid POST CSRF tokens, which kills the child
- * test process before assertions can run.
- *
- * The exit() call on line 28 of preventvalidpost.php terminates the PHP process
- * immediately. Even with @runInSeparateProcess, the child process dies and PHPUnit
- * cannot collect test results from it.
- *
- * To fully test the CSRF rejection path, the production code would need to be
- * refactored: extract the CSRF validation into a function that returns a result
- * instead of calling header()+exit directly.
+ * The CSRF validation logic was extracted into validate_csrf_post() which returns
+ * true/false instead of calling header()+exit, making it fully testable.
+ * The top-level POST block still calls header()+exit for backward compat.
  */
 class PreventValidPostTest extends TestCase
 {
+    // --- Tests for the extracted validate_csrf_post() function ---
+
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function testValidateCsrfPostReturnsTrueForMatchingTokens(): void
+    {
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+        $_SERVER['REQUEST_URI'] = '/test';
+        $_SESSION = ['csrf_token' => 'abc123', 'csrf_token_ok' => true];
+        if (!defined('SQLITE_DB_PATH')) define('SQLITE_DB_PATH', ':memory:');
+        require __DIR__ . '/../lib/preventvalidpost.php';
+
+        $result = validate_csrf_post('abc123', 'abc123');
+        $this->assertTrue($result);
+        $this->assertTrue($_SESSION['csrf_token_ok']);
+    }
+
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function testValidateCsrfPostReturnsFalseForMismatchedTokens(): void
+    {
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+        $_SERVER['REQUEST_URI'] = '/test';
+        $_SESSION = ['csrf_token' => 'abc123', 'csrf_token_ok' => true];
+        if (!defined('SQLITE_DB_PATH')) define('SQLITE_DB_PATH', ':memory:');
+        require __DIR__ . '/../lib/preventvalidpost.php';
+
+        $result = validate_csrf_post('wrong', 'abc123');
+        $this->assertFalse($result);
+    }
+
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function testValidateCsrfPostUnsetsTokenOnFailure(): void
+    {
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+        $_SERVER['REQUEST_URI'] = '/test';
+        $_SESSION = ['csrf_token' => 'abc123', 'csrf_token_ok' => true];
+        if (!defined('SQLITE_DB_PATH')) define('SQLITE_DB_PATH', ':memory:');
+        require __DIR__ . '/../lib/preventvalidpost.php';
+
+        validate_csrf_post('wrong', 'abc123');
+        $this->assertArrayNotHasKey('csrf_token', $_SESSION);
+    }
+
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function testValidateCsrfPostSetsCsrfTokenOkFalseOnFailure(): void
+    {
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+        $_SERVER['REQUEST_URI'] = '/test';
+        $_SESSION = ['csrf_token' => 'abc123', 'csrf_token_ok' => true];
+        if (!defined('SQLITE_DB_PATH')) define('SQLITE_DB_PATH', ':memory:');
+        require __DIR__ . '/../lib/preventvalidpost.php';
+
+        validate_csrf_post('wrong', 'abc123');
+        $this->assertFalse($_SESSION['csrf_token_ok']);
+    }
+
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function testValidateCsrfPostSetsErrorMessageOnFailure(): void
+    {
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+        $_SERVER['REQUEST_URI'] = '/test';
+        $_SESSION = ['csrf_token' => 'abc123', 'csrf_token_ok' => true];
+        if (!defined('SQLITE_DB_PATH')) define('SQLITE_DB_PATH', ':memory:');
+        require __DIR__ . '/../lib/preventvalidpost.php';
+
+        validate_csrf_post('wrong', 'abc123');
+        $this->assertArrayHasKey('mensaje', $_SESSION);
+        $this->assertIsArray($_SESSION['mensaje']);
+    }
+
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function testValidateCsrfPostWithEmptyProvidedToken(): void
+    {
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+        $_SERVER['REQUEST_URI'] = '/test';
+        $_SESSION = ['csrf_token' => 'abc123', 'csrf_token_ok' => true];
+        if (!defined('SQLITE_DB_PATH')) define('SQLITE_DB_PATH', ':memory:');
+        require __DIR__ . '/../lib/preventvalidpost.php';
+
+        $result = validate_csrf_post('', 'abc123');
+        $this->assertFalse($result);
+    }
+
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function testValidateCsrfPostWithEmptySessionToken(): void
+    {
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+        $_SERVER['REQUEST_URI'] = '/test';
+        $_SESSION = ['csrf_token' => '', 'csrf_token_ok' => true];
+        if (!defined('SQLITE_DB_PATH')) define('SQLITE_DB_PATH', ':memory:');
+        require __DIR__ . '/../lib/preventvalidpost.php';
+
+        $result = validate_csrf_post('abc123', '');
+        $this->assertFalse($result);
+    }
+
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function testValidateCsrfPostDoesNotCallExit(): void
+    {
+        // Confirms we reach this line after a failure — no process killed
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+        $_SERVER['REQUEST_URI'] = '/test';
+        $_SESSION = ['csrf_token' => 'abc123', 'csrf_token_ok' => true];
+        if (!defined('SQLITE_DB_PATH')) define('SQLITE_DB_PATH', ':memory:');
+        require __DIR__ . '/../lib/preventvalidpost.php';
+
+        validate_csrf_post('wrong', 'abc123');
+        $this->assertTrue(true);
+    }
+
+    // --- Integration tests for the full include path ---
     #[RunInSeparateProcess]
     #[PreserveGlobalState(false)]
     public function testFileIncludesWithoutErrorOnGetRequest(): void

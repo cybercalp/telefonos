@@ -2,6 +2,26 @@
 //Funciones para la consulta de datos de la tabla attempts_login
 require_once('./lib/db_attemptslogin_select.php');
 
+/**
+ * Valida el token CSRF en POST.
+ * No llama a header() ni exit() — devuelve true/false para ser testeable.
+ * En caso de fallo, invalida el token y prepara el mensaje de sesión.
+ *
+ * @param string $tokenEnviado Token recibido del formulario
+ * @param string $tokenSesion  Token almacenado en sesión
+ * @return bool True si el token es válido
+ */
+function validate_csrf_post($tokenEnviado, $tokenSesion) {
+    if (!hash_equals($tokenSesion, $tokenEnviado)) {
+        unset($_SESSION['csrf_token']);
+        $_SESSION['csrf_token_ok'] = false;
+        $_SESSION['mensaje'] = array('Token CSRF inválido o formulario reenviado.');
+        $_SESSION['mensaje_css'] = '';
+        return false;
+    }
+    return true;
+}
+
 $ip_client = $_SERVER['REMOTE_ADDR'];
 $attempts = 0;
 $blocked_until = 0;
@@ -9,24 +29,15 @@ $now = time(); //timestamp actual
 
 $tiempo_restante = 0;
 
-// Prevenir acceso sin POST válido
+// Prevenir acceso sin POST válido (mantiene comportamiento original con header/exit)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-   // Se ejecuta sólo si  se enviaron datos 
-   $tokenEnviado = $_POST['csrf_token'] ?? '';
-   $tokenSesion = $_SESSION['csrf_token'] ?? '';
+    $tokenEnviado = $_POST['csrf_token'] ?? '';
+    $tokenSesion = $_SESSION['csrf_token'] ?? '';
 
-   // Validar el token CSRF
-   if (!hash_equals($tokenSesion, $tokenEnviado)) {
-      // Invalida el token después del primer uso para evitar reenvíos
-      unset($_SESSION['csrf_token']);
-      $_SESSION['csrf_token_ok'] = false;
-
-      $_SESSION['mensaje'] = array('Token CSRF inválido o formulario reenviado.');
-      $_SESSION['mensaje_css'] = '';
-      // Redirigir para evitar reenvío al refrescar
-      header('Location: ' . $_SERVER['REQUEST_URI']);
-      exit;
-   }
+    if (!validate_csrf_post($tokenEnviado, $tokenSesion)) {
+        header('Location: ' . $_SERVER['REQUEST_URI']);
+        exit;
+    }
 }
 
 // Comprobar si la IP está bloqueada
@@ -44,4 +55,3 @@ if ($row) {
    }
  }
 ?>
-
