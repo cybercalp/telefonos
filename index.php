@@ -91,89 +91,8 @@ if (!$allowed_ip && !empty($_SESSION['ldap_user']) && empty($_SESSION['2fa_verif
 
 <!-- Tailwind CSS -->
 <link rel="stylesheet" href="css/style.css?v=<?php echo filemtime(__DIR__ . '/css/style.css'); ?>">
-    <script>
-    // Función para reordenar secretarios (Drag & Drop)
-    function initSortableSecretaries() {
-        const lists = document.querySelectorAll('.sortable-secretary-list');
-        lists.forEach(el => {
-            if (el.sortableLoaded) return;
-            el.sortableLoaded = true;
-            
-            new Sortable(el, {
-                handle: '.drag-handle',
-                animation: 150,
-                ghostClass: 'bg-amber-100/50',
-                onEnd: function (evt) {
-                    const targetDn = el.getAttribute('data-target-dn');
-                    const items = el.querySelectorAll('.secretary-item');
-                    const newOrder = Array.from(items).map(item => item.getAttribute('data-dn'));
-                    
-                    reorderSecretary(targetDn, newOrder);
-                }
-            });
-        });
-    }
-
-    function reorderSecretary(targetDn, newOrder) {
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
-        fetch('./lib/ldap_reorder_secretary.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams({
-                'target_dn': targetDn,
-                'new_order': JSON.stringify(newOrder),
-                'csrf_token': csrfToken
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (!data.success) {
-                alert('Error al reordenar: ' + data.message);
-                location.reload();
-            }
-        })
-        .catch(err => {
-            console.error('Fetch error:', err);
-            alert('Error de conexión al intentar reordenar.');
-        });
-    }
-
-    function unassignComputerPhone(userSam, computerName) {
-        if (!confirm(`¿Desasignar el equipo ${computerName} del usuario ${userSam}?`)) return;
-        
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
-        const formData = new FormData();
-        formData.append('target_sam', userSam);
-        formData.append('csrf_token', csrfToken);
-        
-        fetch('./lib/ldap_unassign_user_computer.php', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (!data.success) {
-                alert('Error al desasignar: ' + data.message);
-            } else {
-                location.reload();
-            }
-        })
-        .catch(err => {
-            console.error('Fetch error:', err);
-            alert('Error de conexión al intentar desasignar.');
-        });
-    }
-
-    // Inicializar al cargar y después de cualquier cambio ajax si aplica
-    document.addEventListener('DOMContentLoaded', initSortableSecretaries);
-    // Si Alpine.js o algún otro script inyecta HTML, podrías necesitar llamarlo de nuevo
-    document.addEventListener('alpine:initialized', () => {
-        // En este proyecto, los resultados se cargan por PHP síncrono o Alpine
-        // Si se cargan por Alpine o HTMX, hay que vigilar el DOM
-        initSortableSecretaries();
-    });
-</script>
-<script src="js/computers.js?v=<?php echo filemtime(__DIR__ . '/js/computers.js'); ?>"></script>
+    <script src="js/directory.js?v=<?php echo filemtime(__DIR__ . '/js/directory.js'); ?>"></script>
+    <script src="js/computers.js?v=<?php echo filemtime(__DIR__ . '/js/computers.js'); ?>"></script>
 
 <!-- Sortable.js for Drag & Drop support -->
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js" integrity="sha384-eeLEhtwdMwD3X9y+8P3Cn7Idl/M+w8H4uZqkgD/2eJVkWIN1yKzEj6XegJ9dL3q0" crossorigin="anonymous"></script>
@@ -181,40 +100,6 @@ if (!$allowed_ip && !empty($_SESSION['ldap_user']) && empty($_SESSION['2fa_verif
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js" integrity="sha384-Rpe/8orFUm5Q1GplYBHxbuA8Az8O8C5sAoOsdbRWkqPjKFaxPgGZipj4zeHL7lxX" crossorigin="anonymous"></script>
 <!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous">
-
-
-<style>
-    /* === ANIMACION ENTRADA DE FICHAS === */
-    @keyframes cardAppear {
-        from {
-            opacity: 0;
-            transform: translateY(18px) scale(0.97);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-        }
-    }
-
-    .card-animated {
-        animation: cardAppear 0.35s ease-out both;
-    }
-
-    /* === TRANSICION DEL CONTENEDOR GRILLA === */
-    #results-grid {
-        transition: grid-template-columns 0.3s ease;
-    }
-
-    /* Scrollbar personalizada */
-    ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: #f1f5f9; }
-    .dark ::-webkit-scrollbar-track { background: #1e293b; }
-    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-    .dark ::-webkit-scrollbar-thumb { background: #475569; }
-    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
-
-</style>
 </head>
 
 <body class="h-full overflow-hidden flex flex-col bg-slate-50 dark:bg-slate-900 transition-colors duration-300" x-data="{
@@ -883,30 +768,5 @@ if (!$allowed_ip && !empty($_SESSION['ldap_user']) && empty($_SESSION['2fa_verif
 
 <!-- Global HTML Tooltip (outside cards to avoid overflow-hidden + transform clipping) -->
 <div id="global-html-tooltip" class="html-tooltip" style="display:none;"></div>
-<script>
-(function() {
-    const tip = document.getElementById('global-html-tooltip');
-    let activeTrigger = null;
-
-    document.addEventListener('mouseenter', function(e) {
-        const el = e.target.closest('[data-html-tooltip]');
-        if (!el) return;
-        activeTrigger = el;
-        tip.innerHTML = el.getAttribute('data-html-tooltip');
-        tip.style.display = 'block';
-        const r = el.getBoundingClientRect();
-        tip.style.left = (r.left + r.width / 2) + 'px';
-        tip.style.top  = (r.bottom + 10) + 'px';
-    }, true);
-
-    document.addEventListener('mouseleave', function(e) {
-        const el = e.target.closest('[data-html-tooltip]');
-        if (el && el === activeTrigger) {
-            tip.style.display = 'none';
-            activeTrigger = null;
-        }
-    }, true);
-})();
-</script>
 </body>
 </html>
