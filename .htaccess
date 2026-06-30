@@ -1,0 +1,29 @@
+RewriteEngine On
+
+# Deshabilitar listado de directorios globalmente
+Options -Indexes
+
+# ============================================================
+# Redirección HTTP → HTTPS (excepto en desarrollo local)
+# Comentar las condiciones de localhost en producción.
+# ============================================================
+RewriteCond %{HTTPS} off
+RewriteCond %{HTTP_HOST} !^localhost [NC]
+RewriteCond %{HTTP_HOST} !^127\.0\.0\.1 [NC]
+RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+
+# Ruteo específico para enmascaramiento con soporte para query string [QSA]
+RewriteRule ^recuperar-cuenta$ login.php?rescue=1 [QSA,L]
+RewriteRule ^cambiar-clave$ change_pwd.php [QSA,L]
+
+# Si la solicitud externa pide .php directamente y es GET, redirige a la versión sin .php
+RewriteCond %{ENV:REDIRECT_STATUS} ^$
+RewriteCond %{REQUEST_METHOD} GET
+RewriteCond %{REQUEST_URI} ^(.*)\.php$ [NC]
+RewriteRule ^ %1 [R=301,L]
+
+# Si el archivo sin .php existe internamente como .php, despáchalo
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^(.*)$ $1.php [L]

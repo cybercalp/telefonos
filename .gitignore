@@ -1,0 +1,15 @@
+.atl/
+node_modules/
+vendor/
+data/telefonos.db
+private/config.ini
+tmp/
+.antigravitycli/
+composer.phar
+.phpunit.cache/
+*.log
+*.bak
+lib/test_api.ps1
+lib/test_api.py
+lib/test_native.php
+lib/verify_working.ps1

@@ -1,0 +1,15 @@
+# Deshabilitar el listado de archivos en esta carpeta
+Options -Indexes
+
+# Por defecto, denegar acceso directo a cualquier .php
+<FilesMatch "\.php$">
+    Require all denied
+</FilesMatch>
+
+# ============================================================
+# ENDPOINTS PERMITIDOS (llamados desde el frontend vía fetch/AJAX/form)
+# ============================================================
+
+<FilesMatch "^(ldap_search_users|ldap_reorder_secretary|ldap_unassign_user_computer|ldap_manage_secretary|ldap_manage_subordinates|ldap_manage_computers|ldap_get_secretary_html|settoogle|load_photo|generate_vcard|sso_check|get_token|migrate_presencia|sync_presencia)\.php$">
+    Require all granted
+</FilesMatch>

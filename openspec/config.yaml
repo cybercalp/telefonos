@@ -1,0 +1,40 @@
+schema: spec-driven
+
+context: |
+  Tech stack: PHP 8.x, XAMPP (Apache), Tailwind CSS, Alpine.js, SQLite, Composer
+  Architecture: Procedural PHP with centralized bootstrap (bootstrap.php → session_security → security_headers → config). Entry points in root (index.php, login.php, mobile.php, etc.). Business logic in lib/ (LDAP integration, SQLite helpers, CSRF, crypto). Frontend: Tailwind CSS + Alpine.js + Sortable.js + Cropper.js.
+  Testing: PHPUnit 11.5 with 19 tests in tests/ (17 pass, 2 fail). phpunit.xml configured. Executable via `php vendor/phpunit/phpunit/phpunit`.
+  Security: CSRF via hash_equals, AES-256-GCM for TOTP secrets, anti-brute-force (SQLite), IP-based access control with CIDR, CSP + HSTS headers, SRI on CDN resources, HTTPS redirect, lib/ directory blocked from web access.
+  Known issue: User LDAP password stored in $_SESSION['ldap_pass'] after login for rebind operations.
+
+rules:
+  proposal:
+    - Include rollback plan for risky changes
+  specs:
+    - Use Given/When/Then for scenarios
+    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY)
+  design:
+    - Include sequence diagrams for complex flows
+    - Document architecture decisions with rationale
+  tasks:
+    - Group by phase, use hierarchical numbering
+    - Keep tasks completable in one session
+  apply:
+    - Follow existing code patterns
+    tdd: true
+    test_command: "php vendor/phpunit/phpunit/phpunit"
+  verify:
+    test_command: "php vendor/phpunit/phpunit/phpunit"
+    build_command: ""
+    coverage_threshold: 0
+  archive:
+    - Warn before merging destructive deltas
+
+testing:
+  runner: "phpunit"
+  command: "php vendor/phpunit/phpunit/phpunit"
+  strict_tdd: true
+  test_layers:
+    - Unit tests
+    - Integration tests
+  coverage: false

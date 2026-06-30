@@ -1,0 +1,107 @@
+@import "tailwindcss";
+
+@source "../**/*.php";
+
+@theme {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+/* Forzar escaneo de subdirectorios por si acaso */
+@source "../*.php";
+@source "../lib/**/*.php";
+@source "../lib/ldap_showresults.php";
+
+/* Configuración de Dark Mode para v4 (compatibilidad con clase .dark) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Premium Tactile Card Animations */
+.card-animated {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+              border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* --- GRID MODE HOVER (Mosaico) --- */
+.grid > .card-animated:hover {
+  transform: translateY(-6px) scale(1.025) !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 
+              0 8px 10px -6px rgba(0, 0, 0, 0.05) !important;
+  border-color: #cbd5e1 !important; /* border-slate-300 */
+}
+
+/* --- LIST MODE HOVER (Lista) --- */
+.flex-col > .card-animated:hover {
+  transform: translateX(8px) !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 
+              0 4px 6px -2px rgba(0, 0, 0, 0.02) !important;
+  border-color: #cbd5e1 !important; /* border-slate-300 */
+}
+
+/* Dark mode overrides for hover */
+.dark .grid > .card-animated:hover,
+.dark .flex-col > .card-animated:hover {
+  border-color: #475569 !important; /* border-slate-600 */
+}
+
+.dark .grid > .card-animated:hover {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 
+              0 8px 10px -6px rgba(0, 0, 0, 0.2) !important;
+}
+
+.dark .flex-col > .card-animated:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.15), 
+              0 4px 6px -2px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Photo and avatar container micro-animation on card hover */
+.card-animated img, 
+.card-animated .w-20 {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* En grilla, escalado dinámico un poco más pronunciado (1.08) */
+.grid > .card-animated:hover img, 
+.grid > .card-animated:hover .w-20 {
+  transform: scale(1.08) !important;
+}
+
+/* En lista, escalado más sutil (1.04) */
+.flex-col > .card-animated:hover img, 
+.flex-col > .card-animated:hover .w-20 {
+  transform: scale(1.04) !important;
+}
+
+/* Custom HTML Tooltip (global element, positioned via JS) */
+.html-tooltip {
+  position: fixed;
+  transform: translateX(-50%);
+  z-index: 9999;
+  min-width: 180px;
+  max-width: 280px;
+  padding: 10px 14px;
+  background: #1e293b;
+  color: #e2e8f0;
+  font-size: 12px;
+  line-height: 1.5;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  pointer-events: none;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.html-tooltip::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-bottom-color: #1e293b;
+}
+
+.html-tooltip b {
+  color: #93c5fd;
+  font-weight: 700;
+}
+
