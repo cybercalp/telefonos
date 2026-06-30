@@ -72,7 +72,7 @@ if (!$allowed_ip && !empty($_SESSION['ldap_user']) && empty($_SESSION['2fa_verif
 <!DOCTYPE html>
 <html lang="es" class="h-full bg-slate-50 dark:bg-slate-900 antialiased">
 <head>
-<script>
+<script nonce="<?= $csp_nonce ?>">
     (function() {
         const theme = localStorage.getItem('theme') || (document.cookie.match(/(^| )theme=([^;]+)/) || [])[2];
         if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -96,13 +96,13 @@ if (!$allowed_ip && !empty($_SESSION['ldap_user']) && empty($_SESSION['2fa_verif
 
 <!-- Sortable.js for Drag & Drop support -->
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js" integrity="sha384-eeLEhtwdMwD3X9y+8P3Cn7Idl/M+w8H4uZqkgD/2eJVkWIN1yKzEj6XegJ9dL3q0" crossorigin="anonymous"></script>
-<script>window.Sortable||document.write('\x3Cscript src="js/vendor/sortable@1.15.0.min.js">\x3C/script>')</script>
+<script nonce="<?= $csp_nonce ?>">window.Sortable||document.write('\x3Cscript src="js/vendor/sortable@1.15.0.min.js">\x3C/script>')</script>
 <!-- Alpine.js para dinamismo de vistas (grid/list) sin recargar página -->
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js" integrity="sha384-Rpe/8orFUm5Q1GplYBHxbuA8Az8O8C5sAoOsdbRWkqPjKFaxPgGZipj4zeHL7lxX" crossorigin="anonymous"></script>
-<script>document.addEventListener('DOMContentLoaded',function(){if(typeof Alpine==='undefined'){var s=document.createElement('script');s.src='js/vendor/alpine@3.13.3.min.js';s.defer=!0;document.head.appendChild(s)}})</script>
+<script nonce="<?= $csp_nonce ?>">document.addEventListener('DOMContentLoaded',function(){if(typeof Alpine==='undefined'){var s=document.createElement('script');s.src='js/vendor/alpine@3.13.3.min.js';s.defer=!0;document.head.appendChild(s)}})</script>
 <!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
-<script>
+<script nonce="<?= $csp_nonce ?>">
 (function(){
     var faLoaded = false;
     var check = function() {

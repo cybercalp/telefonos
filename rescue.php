@@ -51,7 +51,7 @@ $_SESSION['csrf_token'] = $csrf_token;
 <html lang="es" class="h-full bg-slate-50 dark:bg-slate-900">
 <head>
 
-<script>
+<script nonce="<?= $csp_nonce ?>">
     if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
         document.documentElement.classList.add('dark');
     } else {
@@ -68,9 +68,9 @@ $_SESSION['csrf_token'] = $csrf_token;
 
 
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js" integrity="sha384-Rpe/8orFUm5Q1GplYBHxbuA8Az8O8C5sAoOsdbRWkqPjKFaxPgGZipj4zeHL7lxX" crossorigin="anonymous"></script>
-<script>document.addEventListener('DOMContentLoaded',function(){if(typeof Alpine==='undefined'){var s=document.createElement('script');s.src='js/vendor/alpine@3.13.3.min.js';s.defer=!0;document.head.appendChild(s)}})</script>
+<script nonce="<?= $csp_nonce ?>">document.addEventListener('DOMContentLoaded',function(){if(typeof Alpine==='undefined'){var s=document.createElement('script');s.src='js/vendor/alpine@3.13.3.min.js';s.defer=!0;document.head.appendChild(s)}})</script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
-<script>
+<script nonce="<?= $csp_nonce ?>">
 (function(){
     var faLoaded = false;
     var check = function() {
@@ -94,7 +94,7 @@ $_SESSION['csrf_token'] = $csrf_token;
 })();
 </script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-<style>
+<style nonce="<?= $csp_nonce ?>">
 .glass-panel {
     background: rgba(255, 255, 255, 0.75);
 }
@@ -217,7 +217,7 @@ $_SESSION['csrf_token'] = $csrf_token;
             </div>
         </div>
     </div>
-    <script>
+    <script nonce="<?= $csp_nonce ?>">
         window.tiempoRestante = <?php echo json_encode($tiempo_restante) ?>;
     </script>
     <script src="./js/crono.js"></script>

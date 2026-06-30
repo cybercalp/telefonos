@@ -200,22 +200,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['btnRescue']) && !iss
                     $urlRedirect = 'index';
                     unset($_SESSION['mensaje'], $_SESSION['mensaje_css'], $_SESSION['csrf_token'], $_SESSION['csrf_token_ok'], $_SESSION['secretkey']);
                 }
-                echo '<script>window.location.href="./'.$urlRedirect.'";</script>';
+                echo '<script nonce="' . $csp_nonce . '">window.location.href="./'.$urlRedirect.'";</script>';
                 exit;
             }
             if (isset($_SESSION['secretkey']) && !empty($_SESSION['secretkey'])) {
                 unset($_SESSION['mensaje'], $_SESSION['mensaje_css'], $_SESSION['csrf_token'], $_SESSION['csrf_token_ok']);
-                echo '<script>window.location.href="./totp";</script>';
+                echo '<script nonce="' . $csp_nonce . '">window.location.href="./totp";</script>';
                 exit;
             } else {
                 $_SESSION['mensaje'] = array('El acceso desde fuera de la red corporativa requiere tener configurado el Doble Factor (TOTP). Active esta opción en su perfil desde un equipo interno.');
                 $_SESSION['mensaje_css'] = 'no';
-                echo '<script>window.location.href="'.$_SERVER['REQUEST_URI'].'";</script>';
+                echo '<script nonce="' . $csp_nonce . '">window.location.href="'.$_SERVER['REQUEST_URI'].'";</script>';
                 exit;
             }
         }
         if ($_SESSION['bloqueo_activo'] === true) {
-            echo '<script>window.location.href="'.$_SERVER['REQUEST_URI'].'";</script>';
+            echo '<script nonce="' . $csp_nonce . '">window.location.href="'.$_SERVER['REQUEST_URI'].'";</script>';
             exit;
         }
     }
@@ -227,7 +227,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['btnRescue']) && !iss
 <html lang="es" class="h-full bg-slate-50 dark:bg-slate-900">
 <head>
 
-<script>
+<script nonce="<?= $csp_nonce ?>">
     if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
         document.documentElement.classList.add('dark');
     } else {
@@ -246,10 +246,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['btnRescue']) && !iss
 
 <!-- Alpine.js to handle minor visual reactivity -->
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js" integrity="sha384-Rpe/8orFUm5Q1GplYBHxbuA8Az8O8C5sAoOsdbRWkqPjKFaxPgGZipj4zeHL7lxX" crossorigin="anonymous"></script>
-<script>document.addEventListener('DOMContentLoaded',function(){if(typeof Alpine==='undefined'){var s=document.createElement('script');s.src='js/vendor/alpine@3.13.3.min.js';s.defer=!0;document.head.appendChild(s)}})</script>
+<script nonce="<?= $csp_nonce ?>">document.addEventListener('DOMContentLoaded',function(){if(typeof Alpine==='undefined'){var s=document.createElement('script');s.src='js/vendor/alpine@3.13.3.min.js';s.defer=!0;document.head.appendChild(s)}})</script>
 <!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
-<script>
+<script nonce="<?= $csp_nonce ?>">
 (function(){
     var faLoaded = false;
     var check = function() {
@@ -273,7 +273,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['btnRescue']) && !iss
 })();
 </script>
 
-<style>
+<style nonce="<?= $csp_nonce ?>">
 /* Animaciones y utilidades de cristal */
 .glass-panel {
     background: rgba(255, 255, 255, 0.75);
@@ -439,7 +439,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['btnRescue']) && !iss
         </div>
     </div>
     
-    <script>
+    <script nonce="<?= $csp_nonce ?>">
         window.tiempoRestante = <?php echo json_encode($tiempo_restante) ?>;
     </script>
     <script src="./js/crono.js"></script>

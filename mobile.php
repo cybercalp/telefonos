@@ -59,9 +59,9 @@ $searchResults = isset($_GET['btnBuscar']);
     
     <!-- Alpine.js & Font Awesome -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js" integrity="sha384-Rpe/8orFUm5Q1GplYBHxbuA8Az8O8C5sAoOsdbRWkqPjKFaxPgGZipj4zeHL7lxX" crossorigin="anonymous"></script>
-    <script>document.addEventListener('DOMContentLoaded',function(){if(typeof Alpine==='undefined'){var s=document.createElement('script');s.src='js/vendor/alpine@3.13.3.min.js';s.defer=!0;document.head.appendChild(s)}})</script>
+    <script nonce="<?= $csp_nonce ?>">document.addEventListener('DOMContentLoaded',function(){if(typeof Alpine==='undefined'){var s=document.createElement('script');s.src='js/vendor/alpine@3.13.3.min.js';s.defer=!0;document.head.appendChild(s)}})</script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
-    <script>
+    <script nonce="<?= $csp_nonce ?>">
     (function(){
         var faLoaded = false;
         var check = function() {
@@ -88,7 +88,7 @@ $searchResults = isset($_GET['btnBuscar']);
     <!-- Google Fonts: Outfit -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     
-    <style>
+    <style nonce="<?= $csp_nonce ?>">
         body { 
             font-family: 'Outfit', sans-serif; 
             -webkit-font-smoothing: antialiased;
@@ -145,7 +145,7 @@ $searchResults = isset($_GET['btnBuscar']);
         .dark ::-webkit-scrollbar-thumb { background: #334155; }
     </style>
 
-    <script>
+    <script nonce="<?= $csp_nonce ?>">
         // Detector de Tema Automático con soporte para cambios en tiempo real del SO
         function applyTheme(isDark) {
             if (isDark) {

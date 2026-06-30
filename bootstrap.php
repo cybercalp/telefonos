@@ -22,3 +22,7 @@ require_once __DIR__ . '/lib/security_headers.php';
 
 // 3. Configuración privada (globales, LDAP, IP ranges, DB paths, etc.)
 require_once __DIR__ . '/private/config.php';
+
+// 4. Generate CSP nonce (unique per request, stored in session for AJAX consistency)
+$_SESSION['csp_nonce'] = bin2hex(random_bytes(16));
+$csp_nonce = $_SESSION['csp_nonce'];

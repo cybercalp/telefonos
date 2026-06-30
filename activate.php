@@ -15,7 +15,7 @@ require_once(__DIR__ . '/lib/ldap_newpwd.php');
 <html lang="es" class="h-full bg-slate-50 dark:bg-slate-900">
 <head>
 
-<script>
+<script nonce="<?= $csp_nonce ?>">
     if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
         document.documentElement.classList.add('dark');
     } else {
@@ -32,7 +32,7 @@ require_once(__DIR__ . '/lib/ldap_newpwd.php');
 
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
-<script>
+<script nonce="<?= $csp_nonce ?>">
 (function(){
     var faLoaded = false;
     var check = function() {
@@ -56,7 +56,7 @@ require_once(__DIR__ . '/lib/ldap_newpwd.php');
 })();
 </script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-<style>
+<style nonce="<?= $csp_nonce ?>">
 .glass-panel {
     background: rgba(255, 255, 255, 0.75);
 }

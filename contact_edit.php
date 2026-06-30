@@ -95,7 +95,7 @@ $sw4 = $wValue[3];
 
     <!-- Tailwind CSS -->
     <link rel="stylesheet" href="css/style.css">
-    <script>
+    <script nonce="<?= $csp_nonce ?>">
         if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
         } else {
@@ -103,9 +103,9 @@ $sw4 = $wValue[3];
         }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js" integrity="sha384-eeLEhtwdMwD3X9y+8P3Cn7Idl/M+w8H4uZqkgD/2eJVkWIN1yKzEj6XegJ9dL3q0" crossorigin="anonymous"></script>
-    <script>window.Sortable||document.write('\x3Cscript src="js/vendor/sortable@1.15.0.min.js">\x3C/script>')</script>
+    <script nonce="<?= $csp_nonce ?>">window.Sortable||document.write('\x3Cscript src="js/vendor/sortable@1.15.0.min.js">\x3C/script>')</script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
-    <script>
+    <script nonce="<?= $csp_nonce ?>">
     (function(){
         var faLoaded = false;
         var check = function() {
@@ -129,10 +129,10 @@ $sw4 = $wValue[3];
     })();
     </script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js" integrity="sha384-Rpe/8orFUm5Q1GplYBHxbuA8Az8O8C5sAoOsdbRWkqPjKFaxPgGZipj4zeHL7lxX" crossorigin="anonymous"></script>
-    <script>document.addEventListener('DOMContentLoaded',function(){if(typeof Alpine==='undefined'){var s=document.createElement('script');s.src='js/vendor/alpine@3.13.3.min.js';s.defer=!0;document.head.appendChild(s)}})</script>
+    <script nonce="<?= $csp_nonce ?>">document.addEventListener('DOMContentLoaded',function(){if(typeof Alpine==='undefined'){var s=document.createElement('script');s.src='js/vendor/alpine@3.13.3.min.js';s.defer=!0;document.head.appendChild(s)}})</script>
     <link href="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.css" rel="stylesheet" integrity="sha384-oMy41mb/qJnpJlpXOF57hSu2KGi47l/UV9+tPNrBOs7/ap5Vubj/3phrCtjutHMQ" crossorigin="anonymous" onerror="this.onerror=null;this.href='css/vendor/cropper@1.5.13.min.css'">
 
-    <style>
+    <style nonce="<?= $csp_nonce ?>">
         .bg-gradient-animate {
             background: linear-gradient(120deg, #f8fafc, #e2e8f0, #f8fafc);
             background-size: 200% 200%;
@@ -650,7 +650,7 @@ $sw4 = $wValue[3];
     <!-- Scripts -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js" integrity="sha384-r+ljwOAhwY4/kdyzMnuBg7MEVoWpTMp5EYUDntB/E9qzNwL9dAEcNrb2XaV+mJc2" crossorigin="anonymous"></script>
-    <script>window.Cropper||document.write('\x3Cscript src="js/vendor/cropper@1.5.13.min.js">\x3C/script>')</script>
+    <script nonce="<?= $csp_nonce ?>">window.Cropper||document.write('\x3Cscript src="js/vendor/cropper@1.5.13.min.js">\x3C/script>')</script>
     <script src="js/file.js?v=<?php echo filemtime(__DIR__ . '/js/file.js'); ?>"></script>
 </body>
 
