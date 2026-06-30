@@ -63,7 +63,7 @@ function create_new_pwd_for_user($recoveryUserMail) {
                 $message_success = 'yes';
 //                $message[] = '<a href="./change_pwd.php" class="submit">Continuar proceso de cambio de constrase&ntilde;a</a>';
                 $_SESSION['username'] = $user_get[0]['samaccountname'][0];
-                $_SESSION['userpass'] = $newPassword;
+                $_SESSION['password_just_reset'] = true;
              } else {
                 $message[] = 'Error al cambiar la contraseña:';
                 $error = ldap_error($ldap_conn);

@@ -19,7 +19,7 @@ if (!defined('DS')) {
 $UDS_URL = $config['medley']['UDS_URL'];
 
 // CAMBIA LA CONTRASEÑA DEL USUARIO
-function changePassword($user, $oldPassword, $newPassword, $newPasswordCnf) {
+function changePassword($user, $oldPassword, $newPassword, $newPasswordCnf, $isRecovery = false) {
    global $ldap_protocol, $ldap_host, $ldap_port, $ldap_domain, $ldap_user, $ldap_pass, $ldap_dn;
    global $ldap_admuser, $ldap_admpwd;
    global $password_min_length, $user_max_attempts_allowed;
@@ -38,14 +38,14 @@ function changePassword($user, $oldPassword, $newPassword, $newPasswordCnf) {
    $usuario = $user;
    $clave = $oldPassword;
 
-  if (!empty($usuario) && !empty($clave)) {
+  if (!empty($usuario) && (!empty($clave) || $isRecovery)) {
       //Comprobamos el estado del usuario
        check_user($usuario);
        if ($_SESSION['mensaje_css'] == 'no') {
          return;
        }
    }
-   if (!empty($usuario) && !empty($clave) && !empty($newPassword) && !empty($newPasswordCnf)) {
+   if (!empty($usuario) && (!empty($clave) || $isRecovery) && !empty($newPassword) && !empty($newPasswordCnf)) {
       // Parámetros de conexión LDAP
       $ldap_conn = ldap_connect(get_ldap_uri());
 
@@ -74,10 +74,13 @@ function changePassword($user, $oldPassword, $newPassword, $newPasswordCnf) {
                $ldap_only_user = end($aux);
             }
          }
-         $ldap_pass = $clave;
+         if (!$isRecovery) {
+            $ldap_pass = $clave;
+         }
 
-         // Primero comprobamos las credenciales del usuario que se las quiere cambiar
-	 if (!ldap_bind($ldap_conn, $ldap_user, $ldap_pass)) {
+         // Identity verification: bind as user (skipped in recovery flow —
+         // admin credentials are used directly since the password was just reset)
+	 if (!$isRecovery && !ldap_bind($ldap_conn, $ldap_user, $ldap_pass)) {
             $error = '';
             ldap_get_option($ldap_conn, LDAP_OPT_DIAGNOSTIC_MESSAGE, $error);
             // Por ejemplo: "80090308: LdapErr: DSID-0C09044E, comment: AcceptSecurityContext error, data 773, v2580"

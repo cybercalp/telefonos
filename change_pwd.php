@@ -31,21 +31,23 @@ if (isset($_GET['from']) && !empty($_GET['from'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_SESSION['csrf_token_ok']) && $_SESSION['csrf_token_ok'] === true) {
         // Obtenemos el usuario de la sesión si viene de una ficha interna, o del POST
+        $is_recovery = !empty($_SESSION['password_just_reset']);
         if ((isset($_SESSION['username'])) && (!empty($_SESSION['username']))) {
             $user_to_change = $_SESSION['username'];
-            $old_pwd_to_change = $_SESSION['userpass'];
+            // Recovery flow: admin just reset the password; no plaintext password in session
+            $old_pwd_to_change = $is_recovery ? '' : ($_SESSION['userpass'] ?? '');
         } else {
             $user_to_change = $_POST['txtUserName'] ?? '';
             $old_pwd_to_change = $_POST['txtUserPwd'] ?? '';
         }
         
         if (isset($_POST['txtUserNewPwd'])) {
-            changePassword($user_to_change, $old_pwd_to_change, $_POST['txtUserNewPwd'], $_POST['txtUserNewRtPwd']);
+            changePassword($user_to_change, $old_pwd_to_change, $_POST['txtUserNewPwd'], $_POST['txtUserNewRtPwd'], $is_recovery);
             
             if ($_SESSION['mensaje_css'] == 'yes') {
-                unset($_SESSION['username'], $_SESSION['userpass']);
-                // Cierre de sesión: eliminamos variables de autenticación
-                unset($_SESSION['ldap_user'], $_SESSION['ldap_pass'], $_SESSION['ldap_user_dn']);
+                unset($_SESSION['username'], $_SESSION['userpass'], $_SESSION['password_just_reset']);
+                // Cierre de sesión: eliminamos variable de autenticación
+                unset($_SESSION['ldap_user']);
                 
                 // Redirigir para limpiar el POST pero mantener los mensajes una carga más
                 header('Location: ' . $_SERVER['REQUEST_URI']);
@@ -86,7 +88,6 @@ if(isset($_GET['user'])){
 
 if ((isset($_SESSION['username'])) && (!empty($_SESSION['username']))) {
    $username = $_SESSION['username'];
-   $userpwd = $_SESSION['userpass'];
 }
 
 //Obtenemos IP del cliente
