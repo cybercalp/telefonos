@@ -1,16 +1,8 @@
 <?php
-
-//La clave $key debe tener exactamente 32 bytes para AES-256. 
-//Puedes derivarla de una passphrase con hash('sha256', 'mi-pass').
-
-/*AES-256-CBC o AES-256-GCM
- *     AES-256-CBC: ampliamente usado, pero requiere manejo manual de IV.
- *     AES-256-GCM: más moderno, autenticado (recomendada si tu versión de PHP lo soporta).
+/**
+ * Cifrado AES-256-CBC y AES-256-GCM para secretos 2FA.
+ * La clave debe tener exactamente 32 bytes para AES-256.
  */
-
-
-//La clave $key debe tener exactamente 32 bytes para AES-256.
-//Puedes derivarla de una passphrase con hash('sha256', 'mi-pass').
 
 // --- Funciones de cifrado seguro con AES-256-CBC ---
 function encryptSecret($plaintext, $key) {
@@ -52,12 +44,10 @@ function encryptSecretGCM($plaintext, $uuid) {
     $base64 = base64_encode($combined);
 
     // Validar longitud 1024 => longitud máxima para el campo pager de AD
-    if (strlen($base64) <= 1024) {
-        echo "Cifra lista para pager: {$base64}\n";
-        echo "Longitud: " . strlen($base64) . " caracteres\n";
-    } else {
-        echo "La salida excede los 1024 caracteres de 'pager'\n";
-    }    
+    if (strlen($base64) > 1024) {
+        error_log("encryptSecretGCM: la salida excede los 1024 caracteres del campo pager");
+    }
+
 
     return $base64;
 }
