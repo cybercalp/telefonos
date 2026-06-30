@@ -103,9 +103,34 @@ $sw4 = $wValue[3];
         }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js" integrity="sha384-eeLEhtwdMwD3X9y+8P3Cn7Idl/M+w8H4uZqkgD/2eJVkWIN1yKzEj6XegJ9dL3q0" crossorigin="anonymous"></script>
+    <script>window.Sortable||document.write('\x3Cscript src="js/vendor/sortable@1.15.0.min.js">\x3C/script>')</script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
+    <script>
+    (function(){
+        var faLoaded = false;
+        var check = function() {
+            if (faLoaded) return;
+            var test = document.createElement('i');
+            test.className = 'fas fa-check';
+            test.style.cssText = 'position:absolute;visibility:hidden;font-size:20px;font-family:FontAwesome,"Font Awesome 6 Free"';
+            document.body.appendChild(test);
+            var w = test.offsetWidth;
+            document.body.removeChild(test);
+            if (w > 0) { faLoaded = true; return; }
+            var link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = 'css/vendor/fontawesome@6.5.1.min.css';
+            document.head.appendChild(link);
+            faLoaded = true;
+        };
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', check);
+        else check();
+        setTimeout(check, 3000);
+    })();
+    </script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js" integrity="sha384-Rpe/8orFUm5Q1GplYBHxbuA8Az8O8C5sAoOsdbRWkqPjKFaxPgGZipj4zeHL7lxX" crossorigin="anonymous"></script>
-    <link href="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.css" rel="stylesheet" integrity="sha384-oMy41mb/qJnpJlpXOF57hSu2KGi47l/UV9+tPNrBOs7/ap5Vubj/3phrCtjutHMQ" crossorigin="anonymous">
+    <script>document.addEventListener('DOMContentLoaded',function(){if(typeof Alpine==='undefined'){var s=document.createElement('script');s.src='js/vendor/alpine@3.13.3.min.js';s.defer=!0;document.head.appendChild(s)}})</script>
+    <link href="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.css" rel="stylesheet" integrity="sha384-oMy41mb/qJnpJlpXOF57hSu2KGi47l/UV9+tPNrBOs7/ap5Vubj/3phrCtjutHMQ" crossorigin="anonymous" onerror="this.onerror=null;this.href='css/vendor/cropper@1.5.13.min.css'">
 
     <style>
         .bg-gradient-animate {
@@ -625,6 +650,7 @@ $sw4 = $wValue[3];
     <!-- Scripts -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js" integrity="sha384-r+ljwOAhwY4/kdyzMnuBg7MEVoWpTMp5EYUDntB/E9qzNwL9dAEcNrb2XaV+mJc2" crossorigin="anonymous"></script>
+    <script>window.Cropper||document.write('\x3Cscript src="js/vendor/cropper@1.5.13.min.js">\x3C/script>')</script>
     <script src="js/file.js?v=<?php echo filemtime(__DIR__ . '/js/file.js'); ?>"></script>
 </body>
 
