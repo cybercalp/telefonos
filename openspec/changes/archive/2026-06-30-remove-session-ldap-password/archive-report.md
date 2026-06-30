@@ -12,7 +12,7 @@
 | specs | openspec/changes/archive/2026-06-30-remove-session-ldap-password/specs/session-security/spec.md | ✅ |
 | design | openspec/changes/archive/2026-06-30-remove-session-ldap-password/design.md | ✅ |
 | tasks | openspec/changes/archive/2026-06-30-remove-session-ldap-password/tasks.md | ✅ (7/7 complete) |
-| verify-report | missing | ⚠️ Not created by sdd-verify; verification summary provided inline by orchestrator |
+| verify-report | openspec/changes/archive/2026-06-30-remove-session-ldap-password/verify-report.md | ✅ Created 2026-06-30 (post-archive remediation) |
 
 ## Tasks Completed
 
@@ -50,7 +50,7 @@ All 7 implementation tasks marked `[x]`:
 
 ## Warnings
 
-- ⚠️ `verify-report.md` was not created by `sdd-verify` phase. Verification summary was provided inline by the orchestrator (21 tests, 19 pass, 2 pre-existing failures). The audit trail is partially incomplete but the orchestrator explicitly instructed archive with the provided summary.
+- ✅ `verify-report.md` was created on 2026-06-30 as part of tech debt remediation (#4). Full spec compliance verified: all 4 requirements pass, 2 regression tests pass, 0 `$_SESSION['ldap_pass']` references remain.
 - ⚠️ No CRITICAL issues — the 2 failing tests (ImportCleanupTest) are pre-existing and unrelated to this change.
 
 ## SDD Cycle Complete
