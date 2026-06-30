@@ -37,7 +37,11 @@ class SslEnforcementTest extends TestCase
 
     public function testTestNativeEnforcesSsl(): void
     {
-        $content = file_get_contents(__DIR__ . '/../lib/test_native.php');
+        $filePath = __DIR__ . '/../lib/test_native.php';
+        if (!file_exists($filePath)) {
+            $this->markTestSkipped('lib/test_native.php is gitignored (contains secrets), not available in CI.');
+        }
+        $content = file_get_contents($filePath);
         $scanner = new PhpTokenScanner($content);
         
         // Assert cURL secure options are present
