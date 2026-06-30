@@ -1,0 +1,56 @@
+; Configuración dummy para CI/CD — SIN secretos reales
+; El config.ini real (con credenciales) está gitignoreado
+
+[medley]
+nameAyto = "CI Test"
+app_env = "development"
+app_debug = 0
+
+[ldap]
+ldap_protocol = "ldap://"
+ldap_host = "localhost"
+ldap_port = 389
+ldap_admuser = "cn=admin,dc=test,dc=local"
+ldap_admpwd = ""
+ldap_domain[] = "test.local"
+ldap_user = "cn=service,dc=test,dc=local"
+ldap_pass = ""
+ldap_dn = "dc=test,dc=local"
+ldap_contacts_dn = "ou=contacts,dc=test,dc=local"
+ldap_dn_ubi = "ou=locations,dc=test,dc=local"
+ldap_computers_dn = "ou=computers,dc=test,dc=local"
+ldap_dn_ou[] = "ou=users,dc=test,dc=local"
+filter_ubi = ""
+
+[smtp]
+smtp_host = "localhost"
+smtp_port = 587
+smtp_user = ""
+smtp_pass = ""
+mail_from_address = "noreply@test.local"
+mail_from_name = "CI Test"
+mail_reply_address = ""
+mail_reply_name = ""
+
+[tokens]
+time_assignment = 86400
+
+[attempts]
+limit_attempts = 5
+block_time = 900
+
+[gpo]
+password_min_length = 8
+user_max_attempts_allowed = 5
+
+[ip_filter]
+ip_range[] = "127.0.0.1/32"
+
+[presence_api]
+sync_interval = 300
+
+[session]
+remember_me_days = 30
+
+[mail_domains]
+corp_domain[] = "test.local"
