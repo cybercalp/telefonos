@@ -168,22 +168,9 @@ $(document).ready(function () {
                 zoomOnWheel: true,
                cropBoxMovable: true,
                cropBoxResizable: true,
-               ready: function() {
-                    const cropper = this.cropper;
-                    const img  = cropper.getImageData();
-                    const natW = img.naturalWidth;
-                    const natH = img.naturalHeight;
-                    // El cuadrado 1:1 basado en la dimensión MAYOR
-                    const side = Math.max(natW, natH);
-                    // x/y en píxeles originales; puede ser negativo (fuera del borde)
-                    const x = (natW - side) / 2;
-                    const y = (natH - side) / 2;
- 
-                    // setData sin ningún aspect ratio activo para que no achique el cuadro
-                    cropper.setData({ x, y, width: side, height: side });
- 
-                    updateFilters();
-               }
+                ready: function() {
+                     updateFilters();
+                }
           });
        } catch (err) {
           console.error("Excepción en initCropper:", err);
