@@ -13,6 +13,8 @@ if (session_status() === PHP_SESSION_NONE) {
 require_once('./ldap_permissions.php');
 require_once(__DIR__ . '/csrf.php');
 
+use LDAP\Client;
+
 if (empty($_SESSION['is_authenticated'])) {
     echo json_encode(['success' => false, 'message' => 'No autenticado']);
     exit;
@@ -38,24 +40,22 @@ if (!is_array($new_order)) {
     exit;
 }
 
-$ldap_conn = ldap_connect(get_ldap_uri());
-ldap_set_option($ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3);
-ldap_set_option($ldap_conn, LDAP_OPT_REFERRALS, 0);
+// LDAP connection via Client::factory() (admin)
+try {
+    $client = Client::factory();
+    $ldap_conn = $client->getResource();
+} catch (\RuntimeException $e) {
+    echo json_encode(['success' => false, 'message' => 'Error de config LDAP']);
+    exit;
+}
+
+if (!$ldap_conn) {
+    echo json_encode(['success' => false, 'message' => 'Fallo de bindeo admin']);
+    exit;
+}
 
 $session_dn = isset($_SESSION['auth_user_dn']) ? $_SESSION['auth_user_dn'] : (isset($_SESSION['ldap_user_dn']) ? $_SESSION['ldap_user_dn'] : '');
 $isSelf = !empty($session_dn) && (strcasecmp(trim(str_replace(['\\', ' '], ['', ''], $session_dn)), trim(str_replace(['\\', ' '], ['', ''], $user_dn))) === 0);
-
-// Robust bind logic for admin: ensure UPN format if needed
-$bind_user = $ldap_admuser;
-if (strpos($bind_user, '=') === false && strpos($bind_user, '@') === false) {
-    $bind_user .= '@' . ($ldap_domain[1] ?? $ldap_host);
-}
-
-if (!@ldap_bind($ldap_conn, $bind_user, $ldap_admpwd)) {
-    echo json_encode(['success' => false, 'message' => 'Fallo de bindeo admin']);
-    ldap_unbind($ldap_conn);
-    exit;
-}
 
 // Determinar si el target es un contacto (su DN contiene objectClass=contact) o un usuario
 // y verificar permisos con la función adecuada.
@@ -75,7 +75,7 @@ $has_permission = $is_contact
 
 if (!$has_permission) {
     echo json_encode(['success' => false, 'message' => 'Sin permiso']);
-    ldap_unbind($ldap_conn);
+    
     exit;
 }
 
@@ -99,10 +99,10 @@ $result = @ldap_mod_replace($ldap_conn, $target_dn, $modifs);
     if (!$result) {
         $msg = "Error al operar: " . ldap_error($ldap_conn);
         if (ldap_errno($ldap_conn) == 50) {
-            $msg = "Error: (A pesar de que $bind_user está validado, Active Directory deniega modificar secretary de $target_dn. ¡Faltan permisos AD en Opers. de Cuentas!)";
+            $msg = "Error: Active Directory deniega modificar secretary de $target_dn. ¡Faltan permisos AD en Opers. de Cuentas!";
         }
     }
 
 echo json_encode(['success' => $result, 'message' => $result ? '' : $msg]);
-ldap_unbind($ldap_conn);
+
 ?>

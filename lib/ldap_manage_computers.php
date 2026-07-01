@@ -17,6 +17,8 @@ if (session_status() === PHP_SESSION_NONE) {
 require_once(__DIR__ . '/ldap_permissions.php');
 require_once(__DIR__ . '/csrf.php');
 
+use LDAP\Client;
+
 // Auth check
 if (empty($_SESSION['is_authenticated'])) {
     echo json_encode(['success' => false, 'message' => 'No autenticado']);
@@ -37,23 +39,17 @@ if (!verify_csrf_token(get_token_from_request())) {
 
 $action = $_REQUEST['action'] ?? '';
 
-// LDAP connection
-$ldap_conn = ldap_connect(get_ldap_uri());
-if (!$ldap_conn) {
-    echo json_encode(['success' => false, 'message' => 'No se pudo conectar al servidor LDAP']);
+// LDAP connection via Client::factory() (admin)
+try {
+    $client = Client::factory();
+    $ldap_conn = $client->getResource();
+} catch (\RuntimeException $e) {
+    echo json_encode(['success' => false, 'message' => 'Error de config LDAP: ' . $e->getMessage()]);
     exit;
 }
-ldap_set_option($ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3);
-ldap_set_option($ldap_conn, LDAP_OPT_REFERRALS, 0);
 
-// Admin bind
-$bind_user = $ldap_admuser;
-if (strpos($bind_user, '=') === false && strpos($bind_user, '@') === false) {
-    $bind_user .= '@' . ($ldap_domain[1] ?? $ldap_host);
-}
-if (!@ldap_bind($ldap_conn, $bind_user, $ldap_admpwd)) {
-    echo json_encode(['success' => false, 'message' => 'Error de bindeo admin']);
-    ldap_unbind($ldap_conn);
+if (!$ldap_conn) {
+    echo json_encode(['success' => false, 'message' => 'No se pudo conectar al servidor LDAP']);
     exit;
 }
 
@@ -178,4 +174,3 @@ if ($action === 'clear_description' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 echo json_encode(['success' => false, 'message' => 'Acción no válida']);
-ldap_unbind($ldap_conn);
