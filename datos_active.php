@@ -928,11 +928,12 @@ $corpDomainsList = implode(', ', ($corp_domains ?? ['ajcalp.es']));
                         class="px-4 py-2 rounded-lg text-xs font-bold bg-blue-600 text-white hover:bg-blue-500 shadow-xl shadow-blue-600/20 transition-all flex items-center gap-1.5">
                         <i class="fas fa-floppy-disk"></i> Guardar
                     </button>
-                    <a href="javascript:history.back()"
+                    <a href="./index.php" id="btnVolver"
                         class="px-3 py-2 rounded-lg text-xs font-bold bg-rose-600/10 text-rose-600 dark:text-rose-400 hover:bg-rose-600 hover:text-white transition-all border border-rose-500/20 flex items-center gap-1.5"
                         title="Volver al Directorio">
                         <i class="fas fa-arrow-left"></i> Volver
                     </a>
+                    <script nonce="<?= $csp_nonce ?>">document.getElementById('btnVolver').addEventListener('click',function(e){e.preventDefault();history.back()})</script>
                 </div>
             </div>
         </form>
