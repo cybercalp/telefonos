@@ -3,14 +3,15 @@
 require_once(__DIR__ . '/ldap_encodepwd.php');
 require_once(__DIR__ . '/../private/config.php');
 
+use LDAP\Client;
+
 if (!defined('DS')) {
    define('DS', '\\\\');
 }
 
 // ESTABLECE UNA NUEVA CONTRASEÑA PARA EL USUARIO DADO
-function set_user_password($username, $newPassword) {
-   global $ldap_protocol, $ldap_host, $ldap_port, $ldap_domain, $ldap_dn;
-   global $ldap_admuser, $ldap_admpwd;
+function set_user_password($username, $newPassword, ?Client $ldap = null) {
+   global $ldap_dn;
    global $password_min_length;
 
    $message = array();
@@ -48,19 +49,16 @@ function set_user_password($username, $newPassword) {
    }
 
    // --- PROCESO DE CAMBIO EN LDAP ---
-   $ldap_conn = ldap_connect(get_ldap_uri());
+   $conn = $ldap ?? Client::factory();
+   $ldap_conn = $conn->getResource();
 
    if (!$ldap_conn) {
       $message[] = 'No se pudo conectar al servidor LDAP.';
    } else {
-      ldap_set_option($ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3);
-      ldap_set_option($ldap_conn, LDAP_OPT_REFERRALS, 0);
 
-      // Autenticación administrativa
-      if (ldap_bind($ldap_conn, $ldap_admuser, $ldap_admpwd)) {
-         // Buscar el DN del usuario
-         $filter = '(&(samaccountname=' . trim($username) . ')(objectClass=user)(objectCategory=person))';
-         $attrs = array('dn', 'givenname', 'sn', 'mail', 'othermailbox');
+      // Buscar el DN del usuario
+      $filter = '(&(samaccountname=' . trim($username) . ')(objectClass=user)(objectCategory=person))';
+      $attrs = array('dn', 'givenname', 'sn', 'mail', 'othermailbox');
 
          $search = ldap_search($ldap_conn, $ldap_dn, $filter, $attrs);
          if ($search) {
@@ -71,10 +69,9 @@ function set_user_password($username, $newPassword) {
                // Validación adicional: no contener nombre o apellidos
                $givenName = $entries[0]['givenname'][0] ?? '';
                $sn = $entries[0]['sn'][0] ?? '';
-               if ((!empty($givenName) && stripos($newPassword, $givenName) !== false) || 
-                   (!empty($sn) && stripos($newPassword, $sn) !== false)) {
-                   ldap_unbind($ldap_conn);
-                   $_SESSION['mensaje'] = array('La contraseña no puede contener partes de su nombre real.');
+                if ((!empty($givenName) && stripos($newPassword, $givenName) !== false) || 
+                    (!empty($sn) && stripos($newPassword, $sn) !== false)) {
+                    $_SESSION['mensaje'] = array('La contraseña no puede contener partes de su nombre real.');
                    $_SESSION['mensaje_css'] = 'no';
                    return;
                }
@@ -114,10 +111,6 @@ function set_user_password($username, $newPassword) {
          } else {
             $message[] = 'Error en la búsqueda del usuario.';
          }
-         ldap_unbind($ldap_conn);
-      } else {
-         $message[] = 'Error de autenticación administrativa en LDAP.';
-      }
    }
 
    $_SESSION['mensaje'] = $message;
