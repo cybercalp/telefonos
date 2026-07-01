@@ -8,7 +8,7 @@ class ConnectionTest extends TestCase
 {
     protected function tearDown(): void
     {
-        $keys = ['ldap_protocol', 'ldap_host', 'ldap_port', 'ldap_dn', 'ldap_admpwd', 'ldap_domain'];
+        $keys = ['ldap_protocol', 'ldap_host', 'ldap_port', 'ldap_dn', 'ldap_admuser', 'ldap_admpwd', 'ldap_domain'];
         foreach ($keys as $key) {
             unset($GLOBALS[$key]);
         }
@@ -41,7 +41,7 @@ class ConnectionTest extends TestCase
     public function testFactoryCreatesConnectionFromGlobals(): void
     {
         $this->setupLdapUriStub();
-        $GLOBALS['ldap_dn'] = 'cn=admin,dc=example,dc=com';
+        $GLOBALS['ldap_admuser'] = 'admin';
         $GLOBALS['ldap_admpwd'] = 'password';
 
         $client = @\LDAP\Client::factory();
@@ -61,12 +61,13 @@ class ConnectionTest extends TestCase
 
     #[RunInSeparateProcess]
     #[PreserveGlobalState(false)]
-    public function testFactoryThrowsRuntimeExceptionOnMissingDn(): void
+    public function testFactoryThrowsRuntimeExceptionOnMissingAdmuser(): void
     {
         $this->setupLdapUriStub();
+        $GLOBALS['ldap_admpwd'] = 'password';
 
         $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('ldap_dn');
+        $this->expectExceptionMessage('ldap_admuser');
 
         @\LDAP\Client::factory();
     }
@@ -76,6 +77,7 @@ class ConnectionTest extends TestCase
     public function testFactoryThrowsRuntimeExceptionOnMissingPassword(): void
     {
         $this->setupLdapUriStub();
+        $GLOBALS['ldap_admuser'] = 'admin';
         $GLOBALS['ldap_dn'] = 'cn=admin,dc=example,dc=com';
 
         $this->expectException(\RuntimeException::class);
