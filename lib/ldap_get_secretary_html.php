@@ -14,6 +14,8 @@ require_once(__DIR__ . '/ldap_permissions.php');
 require_once(__DIR__ . '/csrf.php');
 require_once(__DIR__ . '/db_presencia_select.php');
 
+use LDAP\Client;
+
 if (empty($_SESSION['is_authenticated'])) {
     http_response_code(401);
     echo "No autenticado";
@@ -36,19 +38,19 @@ if (!$user_dn) {
     exit;
 }
 
-$ldap_conn = ldap_connect(get_ldap_uri());
-ldap_set_option($ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3);
-ldap_set_option($ldap_conn, LDAP_OPT_REFERRALS, 0);
-
-$bind_user = $ldap_admuser;
-if (strpos($bind_user, '=') === false && strpos($bind_user, '@') === false) {
-    $bind_user .= '@' . ($ldap_domain[1] ?? $ldap_host);
-}
-
-if (!@ldap_bind($ldap_conn, $bind_user, $ldap_admpwd)) {
+// LDAP connection via Client::factory() (admin)
+try {
+    $client = Client::factory();
+    $ldap_conn = $client->getResource();
+} catch (\RuntimeException $e) {
     http_response_code(500);
     echo "Error de conexión LDAP";
-    ldap_unbind($ldap_conn);
+    exit;
+}
+
+if (!$ldap_conn) {
+    http_response_code(500);
+    echo "Error de conexión LDAP";
     exit;
 }
 
@@ -62,7 +64,7 @@ $sr = @ldap_read($ldap_conn, $user_dn, '(objectClass=*)', ['comment', 'secretary
 if (!$sr) {
     http_response_code(404);
     echo "Objeto no encontrado";
-    ldap_unbind($ldap_conn);
+    
     exit;
 }
 $entries = ldap_get_entries($ldap_conn, $sr);
@@ -136,4 +138,4 @@ if (!empty($ordered_sec_dns)) {
     }
 }
 
-ldap_unbind($ldap_conn);
+

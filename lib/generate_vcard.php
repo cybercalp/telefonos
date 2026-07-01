@@ -4,6 +4,8 @@
 
 require_once(__DIR__ . '/../private/config.php');
 
+use LDAP\Client;
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -16,16 +18,10 @@ if (empty($dn)) {
 }
 
 // 1. Conectar a LDAP para extraer los datos reales y frescos, incluyendo la foto binaria
-$ldap_conn = ldap_connect(get_ldap_uri());
+$conn = Client::factory();
+$ldap_conn = $conn->getResource();
 if (!$ldap_conn) {
     die("No se pudo conectar al servidor de directorio para generar el contacto.");
-}
-
-ldap_set_option($ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3);
-ldap_set_option($ldap_conn, LDAP_OPT_REFERRALS, 0);
-
-if (!@ldap_bind($ldap_conn, $ldap_user, $ldap_pass)) {
-    die("Error de autenticación con el servicio de directorio.");
 }
 
 $attrs = ['displayname', 'mail', 'title', 'department', 'telephonenumber', 'mobile', 'thumbnailphoto', 'wwwhomepage'];
@@ -111,5 +107,4 @@ if (!empty($photoBin) && $showPhoto) {
 $vcard .= "END:VCARD\r\n";
 
 echo $vcard;
-ldap_unbind($ldap_conn);
 exit;

@@ -7,6 +7,8 @@ if (session_status() === PHP_SESSION_NONE) {
 require_once(__DIR__ . '/ldap_permissions.php');
 require_once(__DIR__ . '/csrf.php');
 
+use LDAP\Client;
+
 header('Content-Type: application/json; charset=utf-8');
 
 if (empty($_SESSION['is_authenticated']) || empty($_SESSION['ldap_user'])) {
@@ -30,11 +32,16 @@ if (empty($target_sam)) {
     exit;
 }
 
-$ldap_conn = ldap_connect(get_ldap_uri());
-ldap_set_option($ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3);
-ldap_set_option($ldap_conn, LDAP_OPT_REFERRALS, 0);
+// LDAP connection via Client::factory() (admin)
+try {
+    $client = Client::factory();
+    $ldap_conn = $client->getResource();
+} catch (\RuntimeException $e) {
+    echo json_encode(['success' => false, 'message' => 'Error de conexión LDAP']);
+    exit;
+}
 
-if (!@ldap_bind($ldap_conn, $ldap_admuser, $ldap_admpwd)) {
+if (!$ldap_conn) {
     echo json_encode(['success' => false, 'message' => 'Error de conexión LDAP']);
     exit;
 }
@@ -42,7 +49,7 @@ if (!@ldap_bind($ldap_conn, $ldap_admuser, $ldap_admpwd)) {
 // Validar permisos
 if (!is_admin_user() && strcasecmp($_SESSION['ldap_user'], $target_sam) !== 0) {
     echo json_encode(['success' => false, 'message' => 'Permiso denegado para modificar este usuario']);
-    ldap_unbind($ldap_conn);
+    
     exit;
 }
 
@@ -53,7 +60,7 @@ $filter = "(sAMAccountName=" . ldap_escape($target_sam, "", LDAP_ESCAPE_FILTER) 
 $search = @ldap_search($ldap_conn, $root_dn, $filter, ['dn']);
 if (!$search || ldap_count_entries($ldap_conn, $search) === 0) {
     echo json_encode(['success' => false, 'message' => "No se encontró tu usuario en AD. root='$root_dn' err='" . ldap_error($ldap_conn) . "'"]);
-    ldap_unbind($ldap_conn);
+    
     exit;
 }
 
@@ -80,4 +87,4 @@ if ($success1 || $success2) {
     echo json_encode(['success' => false, 'message' => "Error LDAP: Err1($err1), Err2($err2)"]);
 }
 
-ldap_unbind($ldap_conn);
+
