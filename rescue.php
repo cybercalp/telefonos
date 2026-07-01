@@ -94,6 +94,7 @@ $_SESSION['csrf_token'] = $csrf_token;
 })();
 </script>
 <script nonce="<?= $csp_nonce ?>" src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script nonce="<?= $csp_nonce ?>">window.jQuery||document.write('\x3Cscript src="js/vendor/jquery@3.7.1.min.js">\x3C/script>')</script>
 <style nonce="<?= $csp_nonce ?>">
 .glass-panel {
     background: rgba(255, 255, 255, 0.75);
