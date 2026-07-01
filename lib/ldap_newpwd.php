@@ -4,6 +4,8 @@ require_once('./lib/ldap_encodepwd.php');
 
 require_once(__DIR__ . '/../private/config.php');
 
+use LDAP\Client;
+
 if (!defined('DS')) {
    define('DS', '\\\\');
 }
@@ -12,27 +14,22 @@ if (!defined('DS')) {
 $nameAyto = $config['medley']['nameAyto'];
 
 // CREA UN PASSWORD TEMPORAL PARA EL USUARIO DADO
-function create_new_pwd_for_user($recoveryUserMail) {
-   global $ldap_protocol, $ldap_host, $ldap_port, $ldap_domain, $ldap_dn;
-   global $ldap_admuser, $ldap_admpwd;
+function create_new_pwd_for_user($recoveryUserMail, ?Client $ldap = null) {
+   global $ldap_dn;
 
    $message = array();
    $message_success = '';
 
-   // Parámetros de conexión LDAP
-   $ldap_conn = ldap_connect(get_ldap_uri());
+   // Parámetros de conexión LDAP vía Client inyectado
+   $conn = $ldap ?? Client::factory();
+   $ldap_conn = $conn->getResource();
 
    if (!$ldap_conn) {
      $message[] = 'No se pudo conectar al servidor LDAP.';
    } else {
-     // Configurar opciones
-     ldap_set_option($ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3) or die ('Imposible asignar el Protocolo LDAP');
-     ldap_set_option($ldap_conn, LDAP_OPT_REFERRALS, 0);
 
-     // Autenticación
-     if (ldap_bind($ldap_conn, $ldap_admuser, $ldap_admpwd)) {
-       // Filtro para buscar usuario por nombre de cuenta (samAccountName)
-       $filter_to_search = '(othermailbox=' . trim($recoveryUserMail) . ')';
+     // Filtro para buscar usuario por nombre de cuenta (samAccountName)
+     $filter_to_search = '(othermailbox=' . trim($recoveryUserMail) . ')';
 
        // Creo el filtro para la busqueda
        // objectClass=user -  asegura que el objeto sea de tipo usuario.
@@ -82,10 +79,6 @@ function create_new_pwd_for_user($recoveryUserMail) {
            $message[] = 'Filtro: ' . $filter;
            $message[] = 'Base búsqueda: ' . $ldap_dn;
        }
-       ldap_unbind($ldap_conn);
-     }else{
-        $message[] = 'Usuario o contraseña (con permisos administrativos) incorrectos.';
-     }
    }
    foreach ($message as &$msg) {
       
