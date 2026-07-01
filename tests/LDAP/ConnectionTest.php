@@ -8,9 +8,31 @@ class ConnectionTest extends TestCase
 {
     protected function tearDown(): void
     {
-        $keys = ['ldap_host', 'ldap_port', 'ldap_dn', 'ldap_admpwd', 'ldap_protocol', 'ldap_domain'];
+        $keys = ['ldap_protocol', 'ldap_host', 'ldap_port', 'ldap_dn', 'ldap_admpwd', 'ldap_domain'];
         foreach ($keys as $key) {
             unset($GLOBALS[$key]);
+        }
+        // Ensure any session active_host cache is cleared
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            unset($_SESSION['active_ldap_host']);
+        }
+    }
+
+    /**
+     * Helper: defines get_ldap_uri() and required globals for factory tests.
+     * In separate processes, private/config.php is not loaded.
+     */
+    private function setupLdapUriStub(string $host = 'dc.example.com', int $port = 389, string $protocol = 'ldap://'): void
+    {
+        $GLOBALS['ldap_protocol'] = $protocol;
+        $GLOBALS['ldap_host'] = $host;
+        $GLOBALS['ldap_port'] = $port;
+
+        if (!function_exists('get_ldap_uri')) {
+            eval('function get_ldap_uri() {
+                global $ldap_protocol, $ldap_host, $ldap_port;
+                return $ldap_protocol . $ldap_host . ":" . $ldap_port;
+            }');
         }
     }
 
@@ -18,38 +40,21 @@ class ConnectionTest extends TestCase
     #[PreserveGlobalState(false)]
     public function testFactoryCreatesConnectionFromGlobals(): void
     {
-        // GIVEN valid globals
-        $GLOBALS['ldap_protocol'] = 'ldap://';
-        $GLOBALS['ldap_host'] = 'dc.example.com';
-        $GLOBALS['ldap_port'] = 389;
+        $this->setupLdapUriStub();
         $GLOBALS['ldap_dn'] = 'cn=admin,dc=example,dc=com';
         $GLOBALS['ldap_admpwd'] = 'password';
 
-        // WHEN factory() is called (suppress ldap_bind warnings — no real server)
         $client = @\LDAP\Client::factory();
 
-        // THEN a Client instance is returned
         $this->assertInstanceOf(\LDAP\Client::class, $client);
     }
 
     #[RunInSeparateProcess]
     #[PreserveGlobalState(false)]
-    public function testFactoryThrowsRuntimeExceptionOnMissingHost(): void
+    public function testFactoryThrowsRuntimeExceptionWhenGetLdapUriNotAvailable(): void
     {
         $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('ldap_host');
-
-        @\LDAP\Client::factory();
-    }
-
-    #[RunInSeparateProcess]
-    #[PreserveGlobalState(false)]
-    public function testFactoryThrowsRuntimeExceptionOnMissingPort(): void
-    {
-        $GLOBALS['ldap_host'] = 'dc.example.com';
-
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('ldap_port');
+        $this->expectExceptionMessage('get_ldap_uri() not available');
 
         @\LDAP\Client::factory();
     }
@@ -58,8 +63,7 @@ class ConnectionTest extends TestCase
     #[PreserveGlobalState(false)]
     public function testFactoryThrowsRuntimeExceptionOnMissingDn(): void
     {
-        $GLOBALS['ldap_host'] = 'dc.example.com';
-        $GLOBALS['ldap_port'] = 389;
+        $this->setupLdapUriStub();
 
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('ldap_dn');
@@ -71,8 +75,7 @@ class ConnectionTest extends TestCase
     #[PreserveGlobalState(false)]
     public function testFactoryThrowsRuntimeExceptionOnMissingPassword(): void
     {
-        $GLOBALS['ldap_host'] = 'dc.example.com';
-        $GLOBALS['ldap_port'] = 389;
+        $this->setupLdapUriStub();
         $GLOBALS['ldap_dn'] = 'cn=admin,dc=example,dc=com';
 
         $this->expectException(\RuntimeException::class);

@@ -55,18 +55,27 @@ class Client
     /**
      * Creates a Client from global configuration ($GLOBALS).
      *
-     * Reads ldap_host, ldap_port, ldap_dn, ldap_admpwd from $GLOBALS.
+     * Uses get_ldap_uri() for host resolution (supports multiple hosts,
+     * LDAPS protocol, active DC caching). Falls back to $GLOBALS for
+     * credentials.
      *
      * @return self A bound, configured Client instance
      * @throws \RuntimeException when any required global config key is missing
      */
     public static function factory(): self
     {
-        if (empty($GLOBALS['ldap_host'])) {
-            throw new \RuntimeException('Missing required config: ldap_host');
+        if (!function_exists('get_ldap_uri')) {
+            throw new \RuntimeException('get_ldap_uri() not available — ensure private/config.php is loaded');
         }
-        if (empty($GLOBALS['ldap_port'])) {
-            throw new \RuntimeException('Missing required config: ldap_port');
+
+        $uri = get_ldap_uri();
+        $parts = parse_url($uri);
+
+        $host = $parts['host'] ?? '';
+        $port = $parts['port'] ?? 389;
+
+        if (empty($host)) {
+            throw new \RuntimeException('Could not resolve LDAP host from get_ldap_uri()');
         }
         if (empty($GLOBALS['ldap_dn'])) {
             throw new \RuntimeException('Missing required config: ldap_dn');
@@ -76,8 +85,8 @@ class Client
         }
 
         return new self(
-            $GLOBALS['ldap_host'],
-            (int) $GLOBALS['ldap_port'],
+            $host,
+            (int) $port,
             $GLOBALS['ldap_dn'],
             $GLOBALS['ldap_admpwd']
         );
