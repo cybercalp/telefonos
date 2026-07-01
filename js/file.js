@@ -159,15 +159,16 @@ $(document).ready(function () {
              glb_cropper.destroy();
           }
  
-          glb_cropper = new Cropper(document.getElementById('cropImage'), {
-               viewMode: 0,        // Sin restricciones: el cuadro puede salir fuera de la imagen
-               dragMode: 'move',
-               autoCropArea: 1,
-               restore: false,
-               zoomOnWheel: true,
-               cropBoxMovable: true,
-               cropBoxResizable: true,
-               ready: function() {
+           glb_cropper = new Cropper(document.getElementById('cropImage'), {
+                viewMode: 1,        // Restringir el cuadro dentro de la imagen
+                dragMode: 'move',
+                autoCropArea: 1,
+                restore: false,
+                aspectRatio: 1,     // Cuadrado fijo 1:1 (requerido por Active Directory)
+                zoomOnWheel: true,
+                cropBoxMovable: true,
+                cropBoxResizable: true,
+                ready: function() {
                     const cropper = this.cropper;
                     const img  = cropper.getImageData();
                     const natW = img.naturalWidth;
