@@ -24,11 +24,12 @@ class Client
      * @param int    $port     LDAP server port
      * @param string $bindDn   Distinguished name for bind
      * @param string $password Password for bind DN
+     * @param string $scheme   URI scheme: 'ldap' or 'ldaps' (default 'ldap')
      */
-    public function __construct(string $host, int $port, string $bindDn, string $password)
+    public function __construct(string $host, int $port, string $bindDn, string $password, string $scheme = 'ldap')
     {
-        $uri = "ldap://{$host}:{$port}";
-        $conn = ldap_connect($uri);
+        $uri = "{$scheme}://{$host}:{$port}";
+        $conn = @ldap_connect($uri);
 
         if (!$conn) {
             return;
@@ -73,6 +74,7 @@ class Client
 
         $host = $parts['host'] ?? '';
         $port = $parts['port'] ?? 389;
+        $scheme = $parts['scheme'] ?? 'ldap';
 
         if (empty($host)) {
             throw new \RuntimeException('Could not resolve LDAP host from get_ldap_uri()');
@@ -88,7 +90,8 @@ class Client
             $host,
             (int) $port,
             $GLOBALS['ldap_dn'],
-            $GLOBALS['ldap_admpwd']
+            $GLOBALS['ldap_admpwd'],
+            $scheme
         );
     }
 

@@ -86,19 +86,16 @@ class ConnectionTest extends TestCase
 
     public function testGetResourceReturnsLdapConnection(): void
     {
-        // Create instance bypassing constructor (no real LDAP server needed)
         $client = $this->getMockBuilder(\LDAP\Client::class)
             ->disableOriginalConstructor()
             ->onlyMethods([])
             ->getMock();
 
-        // Use reflection to inject a native LDAP\Connection object
-        // (PHP 8.1+ ldap_connect returns LDAP\Connection, not a resource)
         $ref = new \ReflectionClass(\LDAP\Client::class);
         $prop = $ref->getProperty('resource');
         $prop->setAccessible(true);
 
-        $nativeConn = ldap_connect('ldap://localhost');
+        $nativeConn = @ldap_connect('ldap://localhost');
         $prop->setValue($client, $nativeConn);
 
         $result = $client->getResource();
