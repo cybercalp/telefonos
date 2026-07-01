@@ -58,13 +58,11 @@ if ($action === 'search') {
     $query = trim($_GET['q'] ?? '');
     if (strlen($query) < 2) {
         echo json_encode([]);
-        ldap_unbind($ldap_conn);
         exit;
     }
 
     if (empty($ldap_computers_dn)) {
         echo json_encode(['success' => false, 'message' => 'ldap_computers_dn no configurado']);
-        ldap_unbind($ldap_conn);
         exit;
     }
 
@@ -94,7 +92,6 @@ if ($action === 'search') {
     }
 
     echo json_encode($results);
-    ldap_unbind($ldap_conn);
     exit;
 }
 
@@ -105,14 +102,12 @@ if ($action === 'update' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (empty($computer_dn)) {
         echo json_encode(['success' => false, 'message' => 'DN del equipo no proporcionado']);
-        ldap_unbind($ldap_conn);
         exit;
     }
 
     // Validate that the DN belongs to the computers OU (security check)
     if (stripos($computer_dn, $ldap_computers_dn) === false) {
         echo json_encode(['success' => false, 'message' => 'DN no pertenece a la OU de equipos']);
-        ldap_unbind($ldap_conn);
         exit;
     }
 
@@ -138,7 +133,6 @@ if ($action === 'update' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         echo json_encode(['success' => true, 'message' => 'Extensión actualizada correctamente']);
     }
 
-    ldap_unbind($ldap_conn);
     exit;
 }
 
@@ -148,13 +142,11 @@ if ($action === 'clear_description' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (empty($computer_dn)) {
         echo json_encode(['success' => false, 'message' => 'DN del equipo no proporcionado']);
-        ldap_unbind($ldap_conn);
         exit;
     }
 
     if (stripos($computer_dn, $ldap_computers_dn) === false) {
         echo json_encode(['success' => false, 'message' => 'DN no pertenece a la OU de equipos']);
-        ldap_unbind($ldap_conn);
         exit;
     }
 
@@ -169,7 +161,6 @@ if ($action === 'clear_description' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         echo json_encode(['success' => true, 'message' => 'Descripción eliminada']);
     }
 
-    ldap_unbind($ldap_conn);
     exit;
 }
 
