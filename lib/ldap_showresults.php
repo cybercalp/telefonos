@@ -4,6 +4,8 @@ require_once('./lib/db_presencia_select.php');
 require_once('./lib/ldap_permissions.php');
 require_once(__DIR__ . '/../private/config.php');
 
+use LDAP\Client;
+
 /**
  * Obtiene el teléfono fijo de un equipo (computer) a partir de su CN.
  * Usa caché estática para evitar consultas LDAP repetidas en la misma petición.
@@ -54,21 +56,19 @@ if (!defined('DS')) {
 }
 
 // MUESTRA LOS RESULTADOS FILTRADOS
-function show_ldapresults($filter_to_search, $order, $showInactive = false) {
-   global $ldap_protocol, $ldap_host, $ldap_port, $ldap_domain, $ldap_user, $ldap_pass, $ldap_dn, $ldap_dn_ou;
+function show_ldapresults($filter_to_search, $order, $showInactive = false, ?Client $ldap = null) {
+   global $ldap_dn, $ldap_dn_ou;
 
    $message = array();
    $message_success = 'no';
 
-   $ldap_conn = ldap_connect(get_ldap_uri());
+   // Conexión vía Client::factory() (admin credentials)
+   $conn = $ldap ?? Client::factory();
+   $ldap_conn = $conn->getResource();
 
    if (!$ldap_conn) {
-     $message[] = 'No se pudo conectar al servidor LDAP.';
+      $message[] = 'No se pudo conectar al servidor LDAP.';
    } else {
-      ldap_set_option($ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3);
-      ldap_set_option($ldap_conn, LDAP_OPT_REFERRALS, 0);
-
-      if (ldap_bind($ldap_conn, $ldap_user, $ldap_pass)) {
          
          $attrs = array('jpegphoto', 'thumbnailphoto', 'info', 'displayname', 'samaccountname', 'useraccountcontrol', 'employeenumber', 'title', 'department', 'mail', 'physicaldeliveryofficename', 'streetaddress', 'postalcode', 'l', 'st', 'co', 'description', 'comment', 'telephonenumber', 'othertelephone', 'homephone', 'otherhomephone', 'mobile', 'othermobile', 'facsimiletelephoneNumber', 'otherfacsimiletelephoneNumber', 'wwwhomepage', 'secretary', 'postofficebox', 'objectclass', 'distinguishedname', 'logonworkstation');
 
@@ -242,10 +242,6 @@ function show_ldapresults($filter_to_search, $order, $showInactive = false) {
          } else {
             $message[] = 'Error en la búsqueda LDAP con el filtro dado.';
          }
-         ldap_unbind($ldap_conn);
-      } else {
-         $message[] = 'Usuario de consulta LDAP o contraseña incorrectos.';
-      }
    }
    
    if (count($message)>0) $_SESSION['mensaje'] = $message;
