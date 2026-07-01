@@ -967,10 +967,11 @@ $corpDomainsList = implode(', ', ($corp_domains ?? ['ajcalp.es']));
                             </p>
                         </div>
                         <input type="file" id="modalFileSelect" accept="image/jpeg,image/png" style="display: none;">
-                        <button type="button" onclick="document.getElementById('modalFileSelect').click()"
+                        <button id="btnSelectFile" type="button"
                             class="px-6 py-2.5 rounded-xl !bg-slate-800 dark:!bg-slate-100 !text-white dark:!text-slate-800 font-bold hover:!bg-slate-700 dark:hover:!bg-white transition-all shadow-lg text-sm">
                             Seleccionar Archivo
                         </button>
+                        <script nonce="<?= $csp_nonce ?>">document.getElementById('btnSelectFile').addEventListener('click',function(){document.getElementById('modalFileSelect').click()})</script>
                     </div>
                     <p
                         class="text-center text-[10px] text-slate-400 dark:text-slate-500 mt-6 uppercase tracking-widest font-bold">
@@ -1093,7 +1094,7 @@ $corpDomainsList = implode(', ', ($corp_domains ?? ['ajcalp.es']));
     <!-- Scripts al final para asegurar carga del DOM -->
     <script nonce="<?= $csp_nonce ?>" src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script nonce="<?= $csp_nonce ?>">window.jQuery||document.write('\x3Cscript src="js/vendor/jquery@3.7.1.min.js">\x3C/script>')</script>
-    <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js" integrity="sha384-r+ljwOAhwY4/kdyzMnuBg7MEVoWpTMp5EYUDntB/E9qzNwL9dAEcNrb2XaV+mJc2" crossorigin="anonymous"></script>
+    <script nonce="<?= $csp_nonce ?>" src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js" integrity="sha384-r+ljwOAhwY4/kdyzMnuBg7MEVoWpTMp5EYUDntB/E9qzNwL9dAEcNrb2XaV+mJc2" crossorigin="anonymous"></script>
     <script nonce="<?= $csp_nonce ?>">window.Cropper||document.write('\x3Cscript src="js/vendor/cropper@1.5.13.min.js">\x3C/script>')</script>
 
     <script src="js/toogle.js?v=<?php echo filemtime(__DIR__ . '/js/toogle.js'); ?>" nonce="<?= $csp_nonce ?>"></script>
