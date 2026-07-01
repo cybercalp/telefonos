@@ -1095,10 +1095,10 @@ $corpDomainsList = implode(', ', ($corp_domains ?? ['ajcalp.es']));
     <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js" integrity="sha384-r+ljwOAhwY4/kdyzMnuBg7MEVoWpTMp5EYUDntB/E9qzNwL9dAEcNrb2XaV+mJc2" crossorigin="anonymous"></script>
     <script nonce="<?= $csp_nonce ?>">window.Cropper||document.write('\x3Cscript src="js/vendor/cropper@1.5.13.min.js">\x3C/script>')</script>
 
-    <script src="js/toogle.js?v=<?php echo filemtime(__DIR__ . '/js/toogle.js'); ?>"></script>
-    <script src="js/copy.js?v=<?php echo filemtime(__DIR__ . '/js/copy.js'); ?>"></script>
-    <script src="js/file.js?v=<?php echo filemtime(__DIR__ . '/js/file.js'); ?>"></script>
-    <script src="js/subordinates.js?v=<?php echo time(); ?>"></script>
+    <script src="js/toogle.js?v=<?php echo filemtime(__DIR__ . '/js/toogle.js'); ?>" nonce="<?= $csp_nonce ?>"></script>
+    <script src="js/copy.js?v=<?php echo filemtime(__DIR__ . '/js/copy.js'); ?>" nonce="<?= $csp_nonce ?>"></script>
+    <script src="js/file.js?v=<?php echo filemtime(__DIR__ . '/js/file.js'); ?>" nonce="<?= $csp_nonce ?>"></script>
+    <script src="js/subordinates.js?v=<?php echo time(); ?>" nonce="<?= $csp_nonce ?>"></script>
     <!-- Modal Gestionar Subordinados -->
     <div x-data="subordinatesModal" x-show="isOpen" x-transition:enter="transition ease-out duration-300"
         x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
