@@ -7,38 +7,26 @@
 require_once(__DIR__ . '/../private/config.php');
 require_once(__DIR__ . '/ldap_permissions.php');
 
+use LDAP\Client;
+
 /**
  * Obtiene o crea la conexión administrativa LDAP (Singleton)
  */
 function get_admin_ldap_connection() {
-    static $ldap_conn = null;
-    if ($ldap_conn !== null) return $ldap_conn;
+    static $client = null;
+    if ($client !== null) return $client->getResource();
 
-    global $ldap_protocol, $ldap_host, $ldap_port, $ldap_admuser, $ldap_admpwd, $ldap_domain;
-    
-    $ldap_conn = @ldap_connect(get_ldap_uri());
-    if (!$ldap_conn) return null;
-
-    ldap_set_option($ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3);
-    ldap_set_option($ldap_conn, LDAP_OPT_REFERRALS, 0);
-
-    $bind_user = $ldap_admuser;
-    if (strpos($bind_user, '=') === false && strpos($bind_user, '@') === false) {
-        $bind_user .= '@' . ($ldap_domain[1] ?? $ldap_host);
-    }
-    
-    if (!@ldap_bind($ldap_conn, $bind_user, $ldap_admpwd)) {
-        $ldap_conn = null;
+    try {
+        $client = Client::factory();
+    } catch (\RuntimeException $e) {
         return null;
     }
 
-    // Cerrar la conexión limpiamente al terminar el script
-    register_shutdown_function(function() use (&$ldap_conn) {
-        if ($ldap_conn) {
-            @ldap_unbind($ldap_conn);
-            $ldap_conn = null;
-        }
-    });
+    $ldap_conn = $client->getResource();
+    if (!$ldap_conn) {
+        $client = null;
+        return null;
+    }
 
     return $ldap_conn;
 }
@@ -65,7 +53,7 @@ function load_contact_data($dn) {
  * Crea o actualiza un contacto
  */
 function save_contact($dn = null) {
-    global $ldap_protocol, $ldap_host, $ldap_port, $ldap_admuser, $ldap_admpwd, $ldap_dn, $ldap_domain, $ldap_contacts_dn;
+    global $ldap_contacts_dn;
     
     if (!can_edit_contact($dn)) {
         $_SESSION['mensaje'] = ['No tiene permisos para gestionar este contacto.'];
@@ -157,8 +145,6 @@ function save_contact($dn = null) {
  * Elimina un contacto
  */
 function delete_contact($dn) {
-    global $ldap_protocol, $ldap_host, $ldap_port, $ldap_admuser, $ldap_admpwd, $ldap_domain;
-
     if (!can_edit_contact($dn)) return false;
 
     $ldap_conn = get_admin_ldap_connection();
