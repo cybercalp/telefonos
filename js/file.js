@@ -160,7 +160,7 @@ $(document).ready(function () {
           }
  
            glb_cropper = new Cropper(document.getElementById('cropImage'), {
-                viewMode: 1,        // Restringir el cuadro dentro de la imagen
+                viewMode: 0,        // Permitir que el cuadro sobresalga para centrar el recorte
                 dragMode: 'move',
                 autoCropArea: 1,
                 restore: false,
