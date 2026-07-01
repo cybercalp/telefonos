@@ -4,12 +4,14 @@ require_once('./lib/debug_to_console.php');
 
 require_once(__DIR__ . '/../private/config.php');
 
+use LDAP\Client;
+
 if (!defined('DS')) {
    define('DS', '\\\\');
 }
 
 // COMPRUEBA SI LA CUENTA DE UN USUARIO ESTA EXPIRADA O BLOQUEADA
-function check_user($user) {
+function check_user($user, ?Client $ldap = null) {
    global $ldap_protocol, $ldap_host, $ldap_port, $ldap_domain, $ldap_dn;
    global $ldap_only_user;
    global $ldap_admuser, $ldap_admpwd;
@@ -24,15 +26,13 @@ function check_user($user) {
 
    $usuario = htmlspecialchars($user, ENT_QUOTES, 'UTF-8');
 
-   // Parámetros de conexión LDAP
-   $ldap_conn = ldap_connect(get_ldap_uri());
+   // Usar Client inyectado o factory por defecto
+   $client = $ldap ?? Client::factory();
+   $ldap_conn = $client->getResource();
 
    if (!$ldap_conn) {
      $message[] = 'No se pudo conectar al servidor LDAP.';
    } else {
-     // Configurar opciones
-     ldap_set_option($ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3) or die ('Imposible asignar el Protocolo LDAP');
-     ldap_set_option($ldap_conn, LDAP_OPT_REFERRALS, 0);
 
      if (strpos(addslashes($usuario), $ldap_domain[0] . DS) === false) {
        if (strpos($usuario, '@' . $ldap_domain[1])) {
@@ -107,8 +107,7 @@ function check_user($user) {
           $message[] = 'Filtro: ' . $filter;
           $message[] = 'Base búsqueda: ' . $ldap_dn;
         }
-        ldap_unbind($ldap_conn);
-     }else{
+      }else{
        $message[] = 'Usuario o contraseña incorrectos.';
      }
    }

@@ -42,7 +42,7 @@ function changePassword($user, $oldPassword, $newPassword, $newPasswordCnf, $isR
 
   if (!empty($usuario) && (!empty($clave) || $isRecovery)) {
       //Comprobamos el estado del usuario
-       check_user($usuario);
+        check_user($usuario, $ldap);
        if ($_SESSION['mensaje_css'] == 'no') {
          return;
        }
