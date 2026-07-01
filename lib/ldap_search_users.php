@@ -9,6 +9,8 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+use LDAP\Client;
+
 require_once(__DIR__ . '/csrf.php');
 
 if (empty($_SESSION['is_authenticated'])) {
@@ -46,26 +48,18 @@ if (strlen($query) < 3) {
     exit;
 }
 
-// Para contactos usamos siempre admin, para usuarios intentamos usar el del usuario si tiene Pass en sesión (para ver sus propios permisos)
-// Pero en el portal de modernización, la búsqueda de contactos DEBE ser con admin.
-$use_admin = true;
-// Robust bind logic for admin: ensure UPN format if needed
-$bind_user = $ldap_admuser;
-if (strpos($bind_user, '=') === false && strpos($bind_user, '@') === false) {
-    $bind_user .= '@' . ($ldap_domain[1] ?? $ldap_host);
+// Usar Client::factory() para conexión admin
+$ldap_conn = null;
+try {
+    $client = Client::factory();
+    $ldap_conn = $client->getResource();
+} catch (\RuntimeException $e) {
+    if ($app_debug) {
+        error_log('ldap_search_users: Client factory failed: ' . $e->getMessage());
+    }
 }
-$bind_pass = $ldap_admpwd;
 
-$ldap_conn = ldap_connect(get_ldap_uri());
 if (!$ldap_conn) {
-    echo json_encode([]);
-    exit;
-}
-
-ldap_set_option($ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3);
-ldap_set_option($ldap_conn, LDAP_OPT_REFERRALS, 0);
-
-if (!ldap_bind($ldap_conn, $bind_user, $bind_pass)) {
     echo json_encode([]);
     exit;
 }
@@ -146,8 +140,6 @@ foreach ($search_bases as $base_dn) {
         if (count($results) >= 15) break 2; // Suficientes resultados
     }
 }
-
-ldap_unbind($ldap_conn);
 
 // Sort results alphabetically by display name
 uasort($results, function($a, $b) {
