@@ -8,6 +8,8 @@ require_once('./lib/crypt.php');
 
 require_once(__DIR__ . '/../private/config.php');
 
+use LDAP\Client;
+
 if (!defined('DS')) {
    define('DS', '\\\\');
 }
@@ -16,7 +18,7 @@ if (!defined('DS')) {
 $nameAyto = $config['medley']['nameAyto'];
 
 // CONSULTA DATOS DE UN USUARIO DADO EN EL AD
-function load_userdata() {
+function load_userdata(?Client $ldap = null) {
    global $ldap_protocol, $ldap_host, $ldap_port, $ldap_domain, $ldap_dn, $ldap_user, $ldap_pass;
 
    $message = array();
@@ -27,19 +29,23 @@ function load_userdata() {
 
    $session_user = isset($_SESSION['ldap_user']) ? htmlspecialchars($_SESSION['ldap_user'], ENT_QUOTES, 'UTF-8') : '';
 
-   // Service account credentials for all read operations
-   $bind_user = $ldap_user;
-   $bind_pass = $ldap_pass;
-
    if (!empty($session_user)) {
-      // Parámetros de conexión LDAP
-      $ldap_conn = ldap_connect(get_ldap_uri());
+      // Usar Client inyectado o crear uno con service account
+      if ($ldap) {
+         $ldap_conn = $ldap->getResource();
+      } else {
+         $uri = get_ldap_uri();
+         $parts = parse_url($uri);
+         $host = $parts['host'] ?? '';
+         $port = $parts['port'] ?? 389;
+         $scheme = $parts['scheme'] ?? 'ldap';
+         $client = new Client($host, (int)$port, $ldap_user, $ldap_pass, $scheme);
+         $ldap_conn = $client->getResource();
+      }
 
       if (!$ldap_conn) {
         $message[] = 'No se pudo conectar al servidor LDAP.';
       } else {
-         ldap_set_option($ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3);
-         ldap_set_option($ldap_conn, LDAP_OPT_REFERRALS, 0);
 
          // Determinar el SAM corto del usuario logueado en la sesión
          $ldap_only_user = $session_user;
@@ -51,9 +57,8 @@ function load_userdata() {
              $ldap_only_user = end($aux);
          }
 
-         // Autenticación — service account bind exclusively
-         if (ldap_bind($ldap_conn, $bind_user, $bind_pass)) {
-            // Si hay un target_user especificado, comprobamos si es distinto al logueado
+         // Service account already bound via Client
+         // Si hay un target_user especificado, comprobamos si es distinto al logueado
             $effective_user = $ldap_only_user;
             if ($target_user && strcasecmp($target_user, $ldap_only_user) !== 0) {
                 // Primero buscamos el DN del target_user para comprobar permisos
@@ -67,7 +72,6 @@ function load_userdata() {
                             $effective_user = $target_user;
                         } else {
                             $message[] = 'No tiene permisos para editar a este usuario.';
-                            ldap_unbind($ldap_conn);
                             $_SESSION['mensaje'] = $message;
                             return;
                         }
@@ -128,10 +132,6 @@ function load_userdata() {
                $message[] = 'Filtro: ' . $filter;
                $message[] = 'Base búsqueda: ' . $ldap_dn;
 	    }
-	    ldap_unbind($ldap_conn);
-         } else {
-            $message[] = 'Usuario o contraseña incorrectos.';
-         }
       }
    } else {
       $message[] = 'Falta usuario o contraseña.';
