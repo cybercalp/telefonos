@@ -143,8 +143,12 @@ $(document).ready(function () {
            $('#btnCrop').show().removeClass('hidden');
            $('#modalPhotoTitle').text('Ajustar y Recortar');
            
-           // Inicializar cropper con delay para asegurar visibilidad
-           setTimeout(initCropper, 300);
+            // Inicializar cropper después de que el DOM se haya renderizado
+            requestAnimationFrame(() => {
+               requestAnimationFrame(() => {
+                  initCropper();
+               });
+            });
        }
    }
 
