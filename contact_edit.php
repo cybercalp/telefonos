@@ -102,7 +102,7 @@ $sw4 = $wValue[3];
             document.documentElement.classList.remove('dark');
         }
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js" integrity="sha384-eeLEhtwdMwD3X9y+8P3Cn7Idl/M+w8H4uZqkgD/2eJVkWIN1yKzEj6XegJ9dL3q0" crossorigin="anonymous"></script>
+    <script nonce="<?= $csp_nonce ?>" src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js" integrity="sha384-eeLEhtwdMwD3X9y+8P3Cn7Idl/M+w8H4uZqkgD/2eJVkWIN1yKzEj6XegJ9dL3q0" crossorigin="anonymous"></script>
     <script nonce="<?= $csp_nonce ?>">window.Sortable||document.write('\x3Cscript src="js/vendor/sortable@1.15.0.min.js">\x3C/script>')</script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
     <script nonce="<?= $csp_nonce ?>">
@@ -128,7 +128,7 @@ $sw4 = $wValue[3];
         setTimeout(check, 3000);
     })();
     </script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js" integrity="sha384-Rpe/8orFUm5Q1GplYBHxbuA8Az8O8C5sAoOsdbRWkqPjKFaxPgGZipj4zeHL7lxX" crossorigin="anonymous"></script>
+    <script defer nonce="<?= $csp_nonce ?>" src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js" integrity="sha384-Rpe/8orFUm5Q1GplYBHxbuA8Az8O8C5sAoOsdbRWkqPjKFaxPgGZipj4zeHL7lxX" crossorigin="anonymous"></script>
     <script nonce="<?= $csp_nonce ?>">document.addEventListener('DOMContentLoaded',function(){if(typeof Alpine==='undefined'){var s=document.createElement('script');s.src='js/vendor/alpine@3.13.3.min.js';s.defer=!0;document.head.appendChild(s)}})</script>
     <link href="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.css" rel="stylesheet" integrity="sha384-oMy41mb/qJnpJlpXOF57hSu2KGi47l/UV9+tPNrBOs7/ap5Vubj/3phrCtjutHMQ" crossorigin="anonymous" onerror="this.onerror=null;this.href='css/vendor/cropper@1.5.13.min.css'">
 
@@ -564,11 +564,12 @@ $sw4 = $wValue[3];
                             class="px-6 py-2.5 rounded-xl text-sm font-bold bg-blue-600 text-white hover:bg-blue-500 shadow-xl shadow-blue-600/20 transition-all flex items-center gap-2">
                             <i class="fas fa-floppy-disk"></i> Guardar Cambios
                         </button>
-                        <a href="javascript:history.back()"
+                        <a href="./index.php" id="btnVolver"
                             class="px-5 py-2.5 rounded-xl text-sm font-bold bg-rose-600/10 text-rose-600 dark:text-rose-400 hover:bg-rose-600 hover:text-white transition-all border border-rose-500/20 flex items-center gap-2"
                             title="Volver al Directorio">
                             <i class="fas fa-arrow-left"></i> Volver
                         </a>
+                        <script nonce="<?= $csp_nonce ?>">document.getElementById('btnVolver').addEventListener('click',function(e){e.preventDefault();history.back()})</script>
                     </div>
                 </div>
         </form>
@@ -648,10 +649,10 @@ $sw4 = $wValue[3];
     </div>
 
     <!-- Scripts -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js" integrity="sha384-r+ljwOAhwY4/kdyzMnuBg7MEVoWpTMp5EYUDntB/E9qzNwL9dAEcNrb2XaV+mJc2" crossorigin="anonymous"></script>
+    <script nonce="<?= $csp_nonce ?>" src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script nonce="<?= $csp_nonce ?>" src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js" integrity="sha384-r+ljwOAhwY4/kdyzMnuBg7MEVoWpTMp5EYUDntB/E9qzNwL9dAEcNrb2XaV+mJc2" crossorigin="anonymous"></script>
     <script nonce="<?= $csp_nonce ?>">window.Cropper||document.write('\x3Cscript src="js/vendor/cropper@1.5.13.min.js">\x3C/script>')</script>
-    <script src="js/file.js?v=<?php echo filemtime(__DIR__ . '/js/file.js'); ?>"></script>
+    <script nonce="<?= $csp_nonce ?>" src="js/file.js?v=<?php echo filemtime(__DIR__ . '/js/file.js'); ?>"></script>
 </body>
 
 </html>

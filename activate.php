@@ -55,7 +55,7 @@ require_once(__DIR__ . '/lib/ldap_newpwd.php');
     setTimeout(check, 3000);
 })();
 </script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script nonce="<?= $csp_nonce ?>" src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <style nonce="<?= $csp_nonce ?>">
 .glass-panel {
     background: rgba(255, 255, 255, 0.75);
