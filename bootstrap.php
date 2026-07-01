@@ -17,12 +17,12 @@ ini_set('log_errors', '1');
 // 1. Configuración de cookies de sesión (HttpOnly, Secure, SameSite=Lax, strict mode)
 require_once __DIR__ . '/lib/session_security.php';
 
-// 2. Headers de seguridad HTTP (CSP, X-Frame-Options, HSTS, etc.)
-require_once __DIR__ . '/lib/security_headers.php';
-
-// 3. Configuración privada (globales, LDAP, IP ranges, DB paths, etc.)
-require_once __DIR__ . '/private/config.php';
-
-// 4. Generate CSP nonce (unique per request, stored in session for AJAX consistency)
+// 2. Generate CSP nonce BEFORE security headers (must exist when CSP header is sent)
 $_SESSION['csp_nonce'] = bin2hex(random_bytes(16));
 $csp_nonce = $_SESSION['csp_nonce'];
+
+// 3. Headers de seguridad HTTP (CSP, X-Frame-Options, HSTS, etc.) — reads $csp_nonce
+require_once __DIR__ . '/lib/security_headers.php';
+
+// 4. Configuración privada (globales, LDAP, IP ranges, DB paths, etc.)
+require_once __DIR__ . '/private/config.php';
