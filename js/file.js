@@ -107,21 +107,26 @@ $(document).ready(function () {
           return;
        }
 
-       const lector = new FileReader();
-       lector.onload = function (event) {
-         $('#cropImage').attr('src', event.target.result);
-         
-         // Reset sliders
-         $('#rangeBrightness').val(100);
-         $('#rangeContrast').val(100);
-         $('#brightnessVal').text('100%');
-         $('#contrastVal').text('100%');
+        const lector = new FileReader();
+        lector.onload = function (event) {
+          // Reset sliders
+          $('#rangeBrightness').val(100);
+          $('#rangeContrast').val(100);
+          $('#brightnessVal').text('100%');
+          $('#contrastVal').text('100%');
 
-         showStep('edit');
-         
-         // Limpiamos el valor del input file para que si vuelven a seleccionar el mismo archivo se dispare el evento change sin problemas
-         $('#txtPhoto').val('');
-       };
+          // Esperar a que la imagen cargue antes de inicializar Cropper
+          var img = new Image();
+          img.onload = function() {
+             $('#cropImage').attr('src', event.target.result);
+             showStep('edit');
+             initCropper();
+          };
+          img.src = event.target.result;
+          
+          // Limpiamos el valor del input file
+          $('#txtPhoto').val('');
+        };
        lector.onerror = function(err) {
          mostrarMensaje('Error al leer el archivo.', 'danger', 'alertBoxImageCrop');
          $('#txtPhoto').val('');
@@ -148,35 +153,30 @@ $(document).ready(function () {
        }
    }
 
-     function initCropper() {
-        try {
-           // Destruir instancia previa si existe (evita duplicados)
-           if (glb_cropper) {
-              glb_cropper.destroy();
-              glb_cropper = null;
-           }
-           if (typeof Cropper === 'undefined') {
-             console.error("La librería Cropper.js no está cargada.");
-             return;
-          }
-          
-          if (glb_cropper) {
-             glb_cropper.destroy();
-          }
- 
-           glb_cropper = new Cropper(document.getElementById('cropImage'), {
-                viewMode: 0,
-                dragMode: 'move',
-                autoCropArea: 0.6,   // Recuadro inicial al 60% — manejable, se puede ampliar
-                restore: false,
-                aspectRatio: 1,      // Cuadrado fijo 1:1 (Active Directory)
-                zoomOnWheel: true,
-                cropBoxMovable: true,
-                cropBoxResizable: true,
-                ready: function() {
-                    updateFilters();
-                }
-           });
+      function initCropper() {
+         // Destruir instancia previa
+         if (glb_cropper) {
+            glb_cropper.destroy();
+            glb_cropper = null;
+         }
+         if (typeof Cropper === 'undefined') {
+            console.error("La librería Cropper.js no está cargada.");
+            return;
+         }
+
+         glb_cropper = new Cropper(document.getElementById('cropImage'), {
+            viewMode: 0,
+            dragMode: 'move',
+            autoCropArea: 0.6,
+            restore: false,
+            aspectRatio: 1 / 1,
+            zoomOnWheel: true,
+            cropBoxMovable: true,
+            cropBoxResizable: true,
+            ready: function() {
+               updateFilters();
+            }
+         });
        } catch (err) {
           console.error("Excepción en initCropper:", err);
        }
