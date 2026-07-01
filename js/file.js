@@ -162,19 +162,16 @@ $(document).ready(function () {
            glb_cropper = new Cropper(document.getElementById('cropImage'), {
                 viewMode: 0,
                 dragMode: 'move',
-                autoCropArea: 0.8,   // Recuadro inicial al 80% del área visible
+                autoCropArea: 0.6,   // Recuadro inicial al 60% — manejable, se puede ampliar
                 restore: false,
                 aspectRatio: 1,      // Cuadrado fijo 1:1 (Active Directory)
-                minCropBoxWidth: 100,
-                minCropBoxHeight: 100,
                 zoomOnWheel: true,
                 cropBoxMovable: true,
                 cropBoxResizable: true,
-                toggleDragModeOnDblclick: false,
                 ready: function() {
                     updateFilters();
                 }
-            });
+           });
        } catch (err) {
           console.error("Excepción en initCropper:", err);
        }
