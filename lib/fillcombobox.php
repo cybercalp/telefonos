@@ -4,14 +4,15 @@
 
 require_once(__DIR__ . '/../private/config.php');
 require_once(__DIR__ . '/ldap_permissions.php');
-    
+
+use LDAP\Client;
 if (!defined('DS')) {
    define('DS', '\\\\');
 }
 
 // CREA UNA LISTBOX CON LOS VALORES LDAP DISTINTOS
-function fill_combobox($module_name, $attrs, $name_object_html, $classes = null, $selected_value = null) {
-   global $ldap_protocol, $ldap_host, $ldap_port, $ldap_domain, $ldap_dn, $ldap_dn_ubi, $ldap_dn_ou, $filter_ubi, $ldap_user, $ldap_pass;
+function fill_combobox($module_name, $attrs, $name_object_html, $classes = null, $selected_value = null, ?Client $ldap = null) {
+   global $ldap_dn, $ldap_dn_ubi, $ldap_dn_ou, $filter_ubi, $ldap_user, $ldap_pass;
 
    $message = array();
    $message_success = (isset($_SESSION['mensaje_css'])) ? $_SESSION['mensaje_css'] : '';
@@ -23,21 +24,26 @@ function fill_combobox($module_name, $attrs, $name_object_html, $classes = null,
    $clave = $ldap_pass;
 
    if (!empty($usuario) && !empty($clave)) {
-      // Parámetros de conexión LDAP
-      $ldap_conn = ldap_connect(get_ldap_uri());
+      // Parámetros de conexión LDAP vía Client (service account)
+      if ($ldap) {
+         $ldap_conn = $ldap->getResource();
+      } else {
+         $uri = get_ldap_uri();
+         $parts = parse_url($uri);
+         $host = $parts['host'] ?? '';
+         $port = $parts['port'] ?? 389;
+         $scheme = $parts['scheme'] ?? 'ldap';
+         $client = new Client($host, (int)$port, $ldap_user, $ldap_pass, $scheme);
+         $ldap_conn = $client->getResource();
+      }
 
       if (!$ldap_conn) {
          $message[] = 'No se pudo conectar al servidor LDAP.';
       } else {
-         // Especifico la versión del protocolo LDAP
-         ldap_set_option($ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3) or die ('Imposible asignar el Protocolo LDAP');
-         ldap_set_option($ldap_conn, LDAP_OPT_REFERRALS, 0);
 
          //Array con las distintas OU que vamos a analizar
          $ous = array();
 
-         // Autenticación
-         if (ldap_bind($ldap_conn, $ldap_user, $ldap_pass)) {
             switch (true) {
               case (($name_object_html === 'txtOficina') || ($name_object_html === 'txtOffice')):
                // Creo el filtro para la busqueda      
@@ -107,10 +113,6 @@ function fill_combobox($module_name, $attrs, $name_object_html, $classes = null,
                   continue;
                }
             }
-            ldap_unbind($ldap_conn);
-         } else {
-            $message[] = 'Usuario o contraseña incorrectos.';
-         }
       }
    } else {
       $message[] = 'Falta usuario o contraseña.';
