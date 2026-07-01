@@ -107,27 +107,21 @@ $(document).ready(function () {
           return;
        }
 
-        const lector = new FileReader();
-        lector.onload = function (event) {
-          // Reset sliders
-          $('#rangeBrightness').val(100);
-          $('#rangeContrast').val(100);
-          $('#brightnessVal').text('100%');
-          $('#contrastVal').text('100%');
+       const lector = new FileReader();
+       lector.onload = function (event) {
+         $('#cropImage').attr('src', event.target.result);
+         
+         // Reset sliders
+         $('#rangeBrightness').val(100);
+         $('#rangeContrast').val(100);
+         $('#brightnessVal').text('100%');
+         $('#contrastVal').text('100%');
 
-          // Esperar a que la imagen cargue antes de inicializar Cropper
-          var img = new Image();
-           img.onload = function() {
-              $('#cropImage').attr('src', event.target.result);
-              showStep('edit');
-              // Pequeño delay para que el DOM renderice antes de inicializar Cropper
-              setTimeout(initCropper, 100);
-           };
-          img.src = event.target.result;
-          
-          // Limpiamos el valor del input file
-          $('#txtPhoto').val('');
-        };
+         showStep('edit');
+         
+         // Limpiamos el valor del input file para que si vuelven a seleccionar el mismo archivo se dispare el evento change sin problemas
+         $('#txtPhoto').val('');
+       };
        lector.onerror = function(err) {
          mostrarMensaje('Error al leer el archivo.', 'danger', 'alertBoxImageCrop');
          $('#txtPhoto').val('');
@@ -154,30 +148,43 @@ $(document).ready(function () {
        }
    }
 
-      function initCropper() {
-         // Destruir instancia previa
-         if (glb_cropper) {
-            glb_cropper.destroy();
-            glb_cropper = null;
-         }
-         if (typeof Cropper === 'undefined') {
-            console.error("La librería Cropper.js no está cargada.");
-            return;
-         }
-
-         glb_cropper = new Cropper(document.getElementById('cropImage'), {
-            viewMode: 0,
-            dragMode: 'move',
-            autoCropArea: 0.6,
-            restore: false,
-            aspectRatio: 1 / 1,
-            zoomOnWheel: true,
-            cropBoxMovable: true,
-            cropBoxResizable: true,
-            ready: function() {
-               updateFilters();
-            }
-         });
+    function initCropper() {
+       try {
+          if (typeof Cropper === 'undefined') {
+             console.error("La librería Cropper.js no está cargada.");
+             return;
+          }
+          
+          if (glb_cropper) {
+             glb_cropper.destroy();
+          }
+ 
+          glb_cropper = new Cropper(document.getElementById('cropImage'), {
+               viewMode: 0,        // Sin restricciones: el cuadro puede salir fuera de la imagen
+               dragMode: 'move',
+               autoCropArea: 1,
+                restore: false,
+                aspectRatio: 1,      // Forzar recorte cuadrado 1:1 (requerido por Active Directory)
+                zoomOnWheel: true,
+               cropBoxMovable: true,
+               cropBoxResizable: true,
+               ready: function() {
+                    const cropper = this.cropper;
+                    const img  = cropper.getImageData();
+                    const natW = img.naturalWidth;
+                    const natH = img.naturalHeight;
+                    // El cuadrado 1:1 basado en la dimensión MAYOR
+                    const side = Math.max(natW, natH);
+                    // x/y en píxeles originales; puede ser negativo (fuera del borde)
+                    const x = (natW - side) / 2;
+                    const y = (natH - side) / 2;
+ 
+                    // setData sin ningún aspect ratio activo para que no achique el cuadro
+                    cropper.setData({ x, y, width: side, height: side });
+ 
+                    updateFilters();
+               }
+          });
        } catch (err) {
           console.error("Excepción en initCropper:", err);
        }
