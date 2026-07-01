@@ -528,7 +528,7 @@ $corpDomainsList = implode(', ', ($corp_domains ?? ['ajcalp.es']));
                 </div>
 
 
-                <form id="frmPhoto" enctype="multipart/form-data" method="POST" action="./lib/load_photo.php" style="display:none;">
+                <form id="frmPhoto" enctype="multipart/form-data" method="POST" action="./lib/load_photo.php" hidden>
                     <input type="file" id="txtPhoto" name="txtPhoto" accept="image/jpeg,image/png">
                     <input type="hidden" id="croppedPhoto" name="txtThumbnailPhoto" form="frmPhoto">
                     <button id="btnPhotoLoad" type="submit" name="btnLoadPhto">Subir</button>
