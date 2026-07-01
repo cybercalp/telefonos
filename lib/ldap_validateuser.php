@@ -1,4 +1,6 @@
 <?php
+use LDAP\Client;
+
 //Funciones para debug
 require_once('./lib/debug_to_console.php');
 //Funcion para comprobar el estado de un usuario
@@ -18,7 +20,7 @@ if (!defined('DS')) {
 }
 
 // VALIDA USUARIO EN LDAP
-function validate_user($user, $pwd) {
+function validate_user($user, $pwd, ?LDAP\Client $ldap = null) {
    global $ldap_protocol, $ldap_host, $ldap_port, $ldap_domain, $ldap_dn;
    global $ldap_only_user;
 
@@ -40,15 +42,13 @@ function validate_user($user, $pwd) {
          return;
        }
 
-      // Parámetros de conexión LDAP
-      $ldap_conn = ldap_connect(get_ldap_uri());
+       // Parámetros de conexión LDAP — via injected Client or factory fallback
+       $conn = $ldap ?? Client::factory();
+       $ldap_conn = $conn->getResource();
 
-      if (!$ldap_conn) {
-        $message[] = 'No se pudo conectar al servidor LDAP.';
-      } else {
-        // Configurar opciones
-        ldap_set_option($ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3) or die ('Imposible asignar el Protocolo LDAP');
-        ldap_set_option($ldap_conn, LDAP_OPT_REFERRALS, 0);
+       if (!$ldap_conn) {
+         $message[] = 'No se pudo conectar al servidor LDAP.';
+       } else {
 
         if (strpos(addslashes($usuario), $ldap_domain[0] . DS) === false) {
           if (strpos($usuario, '@' . $ldap_domain[1])) {
@@ -205,9 +205,8 @@ function validate_user($user, $pwd) {
             break;
           }
 	}
-	ldap_unbind($ldap_conn);
-      }
-   } else {
+       }
+    } else {
      $message[] = 'Por favor, completa todos los campos.';
    }
    foreach ($message as &$msg) {

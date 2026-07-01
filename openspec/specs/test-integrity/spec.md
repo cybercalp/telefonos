@@ -24,3 +24,24 @@ Then the global configuration MUST reflect the value from private/config.ini.
 Given the global configuration is loaded
 When checking for curl_ca_bundle definition
 Then the test MUST assert the exact key exists in the globals array.
+
+## ADDED Requirements (ldap-abstraction, 2026-06-30)
+
+5. LDAP-dependent functions (`validate_user`, `changePassword`, `sso_check`) SHALL accept an injectable `LDAP\Client` parameter to enable unit testing with mocked connections, ensuring no real network I/O occurs during test execution.
+
+**Implementation note**: The class is `LDAP\Client` (not `LDAP\Connection`) due to PHP 8.1+ native final class conflict.
+
+### Scenario 4: Unit test with mock connection
+Given a PHPUnit test for `validate_user()`
+When a mock `LDAP\Client` is injected
+Then the function MUST execute without establishing a real LDAP connection.
+
+### Scenario 5: Production path uses factory default
+Given a target function is called without a Client argument
+When the function requires LDAP authentication
+Then it MUST obtain a real Client via `Client::factory()`.
+
+### Scenario 6: Mock connection prevents network operations
+Given a mock `LDAP\Client` passed to `changePassword()`
+When the mock's `getResource()` returns a controlled resource
+Then the test MUST NOT trigger real `ldap_modify` network calls.

@@ -1,4 +1,6 @@
 <?php
+use LDAP\Client;
+
 /**
  * sso_check.php
  * Comprueba si Apache ha autenticado al usuario mediante SSPI/NTLM (mod_auth_sspi)
@@ -15,7 +17,7 @@
 
 require_once(__DIR__ . '/../private/config.php');
 
-function sso_check() {
+function sso_check(?LDAP\Client $ldap = null) {
     // Si ya hay sesión activa, no hacemos nada
     if (!empty($_SESSION['is_authenticated'])) {
         return false;
@@ -54,18 +56,17 @@ function sso_check() {
     }
 
     // Verificar que el usuario existe y está activo en AD (usando credenciales de servicio)
-    global $ldap_protocol, $ldap_host, $ldap_port, $ldap_dn, $ldap_user, $ldap_pass;
+    global $ldap_user, $ldap_pass;
 
-    $ldap_conn = ldap_connect(get_ldap_uri());
+    $conn = $ldap ?? Client::factory();
+    $ldap_conn = $conn->getResource();
     if (!$ldap_conn) {
         error_log('[SSO] No se pudo conectar al servidor LDAP para verificar SSO.');
         return false;
     }
 
-    ldap_set_option($ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3);
-    ldap_set_option($ldap_conn, LDAP_OPT_REFERRALS, 0);
-
-    if (!ldap_bind($ldap_conn, $ldap_user, $ldap_pass)) {
+    // Rebind with service credentials (factory did admin bind)
+    if (!@ldap_bind($ldap_conn, $ldap_user, $ldap_pass)) {
         error_log('[SSO] Fallo al hacer bind de servicio LDAP en sso_check.');
         return false;
     }
@@ -79,12 +80,10 @@ function sso_check() {
 
     if (!$result) {
         error_log('[SSO] Búsqueda LDAP fallida para sam: ' . $sam);
-        ldap_unbind($ldap_conn);
         return false;
     }
 
     $entries = ldap_get_entries($ldap_conn, $result);
-    ldap_unbind($ldap_conn);
 
     if ($entries['count'] === 0) {
         error_log('[SSO] Usuario SSO no encontrado o inactivo en AD: ' . $sam);

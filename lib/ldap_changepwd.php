@@ -1,4 +1,6 @@
 <?php
+use LDAP\Client;
+
 //Funciones para mostrar mensajes
 require_once('./lib/ldap_encodepwd.php');
 //Funciones para envio de correo
@@ -19,7 +21,7 @@ if (!defined('DS')) {
 $UDS_URL = $config['medley']['UDS_URL'];
 
 // CAMBIA LA CONTRASEÑA DEL USUARIO
-function changePassword($user, $oldPassword, $newPassword, $newPasswordCnf, $isRecovery = false) {
+function changePassword($user, $oldPassword, $newPassword, $newPasswordCnf, $isRecovery = false, ?LDAP\Client $ldap = null) {
    global $ldap_protocol, $ldap_host, $ldap_port, $ldap_domain, $ldap_user, $ldap_pass, $ldap_dn;
    global $ldap_admuser, $ldap_admpwd;
    global $password_min_length, $user_max_attempts_allowed;
@@ -46,15 +48,13 @@ function changePassword($user, $oldPassword, $newPassword, $newPasswordCnf, $isR
        }
    }
    if (!empty($usuario) && (!empty($clave) || $isRecovery) && !empty($newPassword) && !empty($newPasswordCnf)) {
-      // Parámetros de conexión LDAP
-      $ldap_conn = ldap_connect(get_ldap_uri());
+       // Parámetros de conexión LDAP — via injected Client or factory fallback
+       $conn = $ldap ?? Client::factory();
+       $ldap_conn = $conn->getResource();
 
-      if (!$ldap_conn) {
-         $message[] = 'Error E999 - No se pudo conectar al servidor LDAP.';
-      } else {
-         // Configurar opciones
-         ldap_set_option($ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3);
-         ldap_set_option($ldap_conn, LDAP_OPT_REFERRALS, 0);
+       if (!$ldap_conn) {
+          $message[] = 'Error E999 - No se pudo conectar al servidor LDAP.';
+       } else {
 
          if (strpos($usuario, $ldap_domain[0] . DS) === false) {
             if (strpos($usuario, '@' . $ldap_domain[1])) {
@@ -294,9 +294,8 @@ function changePassword($user, $oldPassword, $newPassword, $newPasswordCnf, $isR
             }
             //Limpiamos tabla attempts_login
             delete_attempts_login_fail(true);
-	    $_SESSION['bloqueo_activo'] = false;
-            ldap_unbind($ldap_conn);
-         }else{
+            $_SESSION['bloqueo_activo'] = false;
+          }else{
            $message[] = 'Usuario o contraseña (con permisos administrativos) incorrectos.';
            $message[] = add_attempts_login_fail();
          }
