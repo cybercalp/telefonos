@@ -117,11 +117,12 @@ $(document).ready(function () {
 
           // Esperar a que la imagen cargue antes de inicializar Cropper
           var img = new Image();
-          img.onload = function() {
-             $('#cropImage').attr('src', event.target.result);
-             showStep('edit');
-             initCropper();
-          };
+           img.onload = function() {
+              $('#cropImage').attr('src', event.target.result);
+              showStep('edit');
+              // Pequeño delay para que el DOM renderice antes de inicializar Cropper
+              setTimeout(initCropper, 100);
+           };
           img.src = event.target.result;
           
           // Limpiamos el valor del input file
