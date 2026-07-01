@@ -981,8 +981,8 @@ $corpDomainsList = implode(', ', ($corp_domains ?? ['ajcalp.es']));
                 <!-- PASO 2: EDICIÓN -->
                 <div id="stepEdit" class="p-4 !bg-slate-50 dark:!bg-slate-900 hidden">
                     <!-- Área de recorte (fondo neutro para ver transparencias) -->
-                    <div class="w-full mb-3 rounded-xl overflow-hidden" style="min-height:300px;">
-                        <img id="cropImage" style="display:block; max-width:100%;">
+                    <div class="w-full mb-3 rounded-xl overflow-hidden bg-slate-200 dark:bg-slate-700" style="max-height:400px;">
+                        <img id="cropImage" style="display:block; max-width:100%; max-height:400px; object-fit:contain;">
                     </div>
                     <!-- Controles Brillo/Contraste -->
                     <div
