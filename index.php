@@ -211,6 +211,6 @@ if (!$allowed_ip && !empty($_SESSION['ldap_user']) && empty($_SESSION['2fa_verif
     <?php endif; ?>
 
 <!-- Global HTML Tooltip (outside cards to avoid overflow-hidden + transform clipping) -->
-<div id="global-html-tooltip" class="html-tooltip" style="display:none;"></div>
+<div id="global-html-tooltip" class="html-tooltip" hidden style="display:none; visibility:hidden;"></div>
 </body>
 </html>
