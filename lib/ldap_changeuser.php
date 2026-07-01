@@ -3,45 +3,35 @@
 require_once('./lib/crypt.php');
 require_once(__DIR__ . '/../private/config.php');
 
+use LDAP\Client;
+
 if (!defined('DS')) {
    define('DS', '\\\\');
 }
 
-function update_ldap_data($user_dn) {
-   global $ldap_protocol, $ldap_host, $ldap_port, $ldap_domain, $ldap_dn, $ldap_user, $ldap_pass, $ldap_admuser, $ldap_admpwd, $app_debug;
+function update_ldap_data($user_dn, ?Client $ldap = null) {
+   global $ldap_admuser, $app_debug;
 
    $message = array();
    $message_success = '';
 
-   // Conexión
-   $ldap_conn = ldap_connect(get_ldap_uri());
+   // Conexión vía Client inyectado
+   $conn = $ldap ?? Client::factory();
+   $ldap_conn = $conn->getResource();
+
    if (!$ldap_conn) {
       $message[] = 'No se pudo conectar al servidor LDAP.';
    } else {
-      ldap_set_option($ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3);
-      ldap_set_option($ldap_conn, LDAP_OPT_REFERRALS, 0);
 
       // 1. Determinar si es un cambio PROPIO (comparación robusta de DN)
       $session_dn = isset($_SESSION['auth_user_dn']) ? $_SESSION['auth_user_dn'] : (isset($_SESSION['ldap_user_dn']) ? $_SESSION['ldap_user_dn'] : '');
       $isSelf = !empty($session_dn) && (strcasecmp(trim(str_replace(['\\', ' '], ['', ''], $session_dn)), trim(str_replace(['\\', ' '], ['', ''], $user_dn))) === 0);
 
-      // 2. Bindeo ADMINISTRATIVO (Preferido)
-      $bind_success = @ldap_bind($ldap_conn, $ldap_admuser, $ldap_admpwd);
-      $using_admin = true;
-
-      if (!$bind_success) {
-          $message[] = 'Error de bindeo administrativo (LDAP Bind).';
-          ldap_unbind($ldap_conn);
-          $_SESSION['mensaje'] = $message;
-          return;
-      }
-
       // 3. Comprobar permisos de negocio (¿Puede el usuario actual editar al target?)
       require_once(__DIR__ . '/ldap_permissions.php');
-      if (!can_edit_user($ldap_conn, $user_dn)) {
-          $message[] = 'No tienes permiso para editar a este usuario (Regla de negocio).';
-          ldap_unbind($ldap_conn);
-          $_SESSION['mensaje'] = $message;
+       if (!can_edit_user($ldap_conn, $user_dn)) {
+           $message[] = 'No tienes permiso para editar a este usuario (Regla de negocio).';
+           $_SESSION['mensaje'] = $message;
           return;
       }
 
@@ -95,9 +85,8 @@ function update_ldap_data($user_dn) {
           } else {
               $message[] = "Motivo: $ldap_err";
           }
-      }
-      ldap_unbind($ldap_conn);
-   }
+       }
+    }
    $_SESSION['mensaje'] = $message;
    $_SESSION['mensaje_css'] = $message_success;
 }
