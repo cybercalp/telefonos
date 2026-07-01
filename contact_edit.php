@@ -247,7 +247,7 @@ $sw4 = $wValue[3];
                         class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-rose-600 hover:text-white transition-all text-xs flex items-center justify-center border border-slate-200 dark:border-slate-600"
                         title="Borrar Foto"><i class="fas fa-trash-alt"></i></button>
                 </div>
-                <input type="file" id="txtPhoto" name="_photoFile" accept="image/jpeg,image/png" style="display: block; width: 0; height: 0; opacity: 0; pointer-events: none; position: absolute;">
+                <input type="file" id="txtPhoto" name="_photoFile" accept="image/jpeg,image/png" style="display: none;">
             </div>
 
             <!-- Texto (derecha de la foto) -->
