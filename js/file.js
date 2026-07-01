@@ -148,9 +148,14 @@ $(document).ready(function () {
        }
    }
 
-    function initCropper() {
-       try {
-          if (typeof Cropper === 'undefined') {
+     function initCropper() {
+        try {
+           // Destruir instancia previa si existe (evita duplicados)
+           if (glb_cropper) {
+              glb_cropper.destroy();
+              glb_cropper = null;
+           }
+           if (typeof Cropper === 'undefined') {
              console.error("La librería Cropper.js no está cargada.");
              return;
           }
