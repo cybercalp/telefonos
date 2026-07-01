@@ -5,13 +5,15 @@ require_once('./lib/db_attemptslogin_del.php');
 
 require_once(__DIR__ . '/../private/config.php');
 
+use LDAP\Client;
+
 if (!defined('DS')) {
    define('DS', '\\\\');
 }
 
 // VALIDA MAIL DE RECUPERACIÓN EN LDAP
-function validate_mail($usermail) {
-   global $ldap_protocol, $ldap_host, $ldap_port, $ldap_domain, $ldap_user, $ldap_pass, $ldap_dn;
+function validate_mail($usermail, ?Client $ldap = null) {
+   global $ldap_domain, $ldap_user, $ldap_pass, $ldap_dn;
 
    $message = array();
    $message_success = '';
@@ -21,40 +23,36 @@ function validate_mail($usermail) {
       $clave = $ldap_pass;
 
       if (!empty($usuario) && !empty($clave)) {
-         // Parámetros de conexión LDAP
-         $ldap_conn = ldap_connect(get_ldap_uri());
-
-         if (!$ldap_conn) {
-           $message[] = 'No se pudo conectar al servidor LDAP.';
+         // Parámetros de conexión LDAP vía Client (service account)
+         if ($ldap) {
+            $ldap_conn = $ldap->getResource();
          } else {
-            // Configurar opciones
-            ldap_set_option($ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3) or die ('Imposible asignar el Protocolo LDAP');
-            ldap_set_option($ldap_conn, LDAP_OPT_REFERRALS, 0);
-
+            // Normalizar usuario para bind
+            $ldap_user = $usuario;
             if (strpos(addslashes($usuario), $ldap_domain[0] . DS) === false) {
                if (strpos($usuario, '@' . $ldap_domain[1])) {
                   $ldap_user = $usuario;
-                  if (empty($ldap_only_user)) {
-                     $aux = explode('@', $usuario);
-                     $ldap_only_user = reset($aux);
-                  }
-               }else{
+               } else {
                   $ldap_user = $usuario . '@' . $ldap_domain[1];
-                  if (empty($ldap_only_user)) $ldap_only_user = $usuario;
-               }
-            }else{
-               $ldap_user = $usuario;
-               if (empty($ldap_only_user)) {
-                  $aux = explode('\\', $usuario);
-                  $ldap_only_user = end($aux);
                }
             }
-	    $ldap_pass = $clave;
+            $ldap_pass = $clave;
 
-            // Autenticación
-            if (ldap_bind($ldap_conn, $ldap_user, $ldap_pass)) {
-               // Filtro para buscar usuario por nombre de cuenta (samAccountName)
-               $filter_to_search = '(othermailbox=' . trim($usermail) . ')';
+            $uri = get_ldap_uri();
+            $parts = parse_url($uri);
+            $host = $parts['host'] ?? '';
+            $port = $parts['port'] ?? 389;
+            $scheme = $parts['scheme'] ?? 'ldap';
+            $client = new Client($host, (int)$port, $ldap_user, $ldap_pass, $scheme);
+            $ldap_conn = $client->getResource();
+         }
+
+         if (!$ldap_conn) {
+            $message[] = 'No se pudo conectar al servidor LDAP.';
+         } else {
+
+            // Filtro para buscar usuario por nombre de cuenta (samAccountName)
+            $filter_to_search = '(othermailbox=' . trim($usermail) . ')';
 
                // Creo el filtro para la busqueda
                // objectClass=user -  asegura que el objeto sea de tipo usuario.
@@ -85,10 +83,6 @@ function validate_mail($usermail) {
                   $message[] = 'Filtro: ' . $filter;
                   $message[] = 'Base búsqueda: ' . $ldap_dn;
 	       }
-	       ldap_unbind($ldap_conn);
-            }else{
-               $message[] = 'Usuario o contraseña incorrectos.';
-            }
          }
       } else {
         $message[] = 'Falta usuario o contraseña.';
@@ -105,8 +99,8 @@ function validate_mail($usermail) {
 }
 
 // VALIDA USUARIO Y MAIL DE RECUPERACIÓN EN LDAP
-function validate_user_mail($username, $usermail) {
-   global $ldap_protocol, $ldap_host, $ldap_port, $ldap_domain, $ldap_user, $ldap_pass, $ldap_dn;
+function validate_user_mail($username, $usermail, ?Client $ldap = null) {
+   global $ldap_domain, $ldap_user, $ldap_pass, $ldap_dn;
 
    $message = array();
    $message_success = '';
@@ -116,47 +110,52 @@ function validate_user_mail($username, $usermail) {
       $clave = $ldap_pass;
 
       if (!empty($usuario) && !empty($clave)) {
-         $ldap_conn = ldap_connect(get_ldap_uri());
-
-         if (!$ldap_conn) {
-           $message[] = 'No se pudo conectar al servidor LDAP.';
+         // Parámetros de conexión LDAP vía Client (service account)
+         if ($ldap) {
+            $ldap_conn = $ldap->getResource();
          } else {
-            ldap_set_option($ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3);
-            ldap_set_option($ldap_conn, LDAP_OPT_REFERRALS, 0);
-
-            // Preparar usuario para bind (admin)
+            // Preparar usuario para bind
             if (strpos($usuario, '@' . $ldap_domain[1]) === false && strpos($usuario, $ldap_domain[0] . '\\') === false) {
                $bind_user = $usuario . '@' . $ldap_domain[1];
             } else {
                $bind_user = $usuario;
             }
+            $bind_pass = $clave;
 
-            if (ldap_bind($ldap_conn, $bind_user, $clave)) {
-               // Filtro para buscar por samaccountname Y othermailbox
-               $filter = '(&' . 
-                         '(samaccountname=' . trim($username) . ')' . 
-                         '(othermailbox=' . trim($usermail) . ')' . 
-                         '(objectClass=user)(objectCategory=person)(!(userAccountControl:1.2.840.113556.1.4.803:=2)))';
-               
-               $attrs = array('dn', 'samaccountname', 'othermailbox');
-               $result = ldap_search($ldap_conn, $ldap_dn, $filter, $attrs);
-               
-               if ($result) {
-                  $entries = ldap_get_entries($ldap_conn, $result);
-                  if ($entries['count'] > 0) {
-                     $message_success = 'yes';
-                     delete_attempts_login_fail(true);
-                     $_SESSION['bloqueo_activo'] = false;
-                  } else {
-                     $message[] = 'No se ha encontrado una coincidencia para el usuario y correo proporcionados.';
-                     $message[] = add_attempts_login_fail();
-                  }
+            $uri = get_ldap_uri();
+            $parts = parse_url($uri);
+            $host = $parts['host'] ?? '';
+            $port = $parts['port'] ?? 389;
+            $scheme = $parts['scheme'] ?? 'ldap';
+            $client = new Client($host, (int)$port, $bind_user, $bind_pass, $scheme);
+            $ldap_conn = $client->getResource();
+         }
+
+         if (!$ldap_conn) {
+            $message[] = 'No se pudo conectar al servidor LDAP.';
+         } else {
+
+            // Filtro para buscar por samaccountname Y othermailbox
+            $filter = '(&' . 
+                      '(samaccountname=' . trim($username) . ')' . 
+                      '(othermailbox=' . trim($usermail) . ')' . 
+                      '(objectClass=user)(objectCategory=person)(!(userAccountControl:1.2.840.113556.1.4.803:=2)))';
+            
+            $attrs = array('dn', 'samaccountname', 'othermailbox');
+            $result = ldap_search($ldap_conn, $ldap_dn, $filter, $attrs);
+            
+            if ($result) {
+               $entries = ldap_get_entries($ldap_conn, $result);
+               if ($entries['count'] > 0) {
+                  $message_success = 'yes';
+                  delete_attempts_login_fail(true);
+                  $_SESSION['bloqueo_activo'] = false;
                } else {
-                  $message[] = 'Error en la búsqueda LDAP.';
+                  $message[] = 'No se ha encontrado una coincidencia para el usuario y correo proporcionados.';
+                  $message[] = add_attempts_login_fail();
                }
-               ldap_unbind($ldap_conn);
             } else {
-               $message[] = 'Error de autenticación administrativa en LDAP.';
+               $message[] = 'Error en la búsqueda LDAP.';
             }
          }
       } else {
