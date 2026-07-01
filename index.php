@@ -91,8 +91,8 @@ if (!$allowed_ip && !empty($_SESSION['ldap_user']) && empty($_SESSION['2fa_verif
 
 <!-- Tailwind CSS -->
 <link rel="stylesheet" href="css/style.css?v=<?php echo filemtime(__DIR__ . '/css/style.css'); ?>">
-    <script src="js/directory.js?v=<?php echo filemtime(__DIR__ . '/js/directory.js'); ?>"></script>
-    <script src="js/computers.js?v=<?php echo filemtime(__DIR__ . '/js/computers.js'); ?>"></script>
+    <script src="js/directory.js?v=<?php echo filemtime(__DIR__ . '/js/directory.js'); ?>" nonce="<?= $csp_nonce ?>"></script>
+    <script src="js/computers.js?v=<?php echo filemtime(__DIR__ . '/js/computers.js'); ?>" nonce="<?= $csp_nonce ?>"></script>
 
 <!-- Sortable.js for Drag & Drop support -->
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js" integrity="sha384-eeLEhtwdMwD3X9y+8P3Cn7Idl/M+w8H4uZqkgD/2eJVkWIN1yKzEj6XegJ9dL3q0" crossorigin="anonymous"></script>
@@ -200,7 +200,7 @@ if (!$allowed_ip && !empty($_SESSION['ldap_user']) && empty($_SESSION['2fa_verif
     </div>
 
     <!-- No Bootstrap. Pure Tailwind / Alpine -->
-    <script src="js/secretary.js?v=<?php echo filemtime(__DIR__ . '/js/secretary.js'); ?>"></script>
+    <script src="js/secretary.js?v=<?php echo filemtime(__DIR__ . '/js/secretary.js'); ?>" nonce="<?= $csp_nonce ?>"></script>
 
     <?php include __DIR__ . '/templates/modals/secretary.php'; ?>
     <?php include __DIR__ . '/templates/modals/delete-contact.php'; ?>
