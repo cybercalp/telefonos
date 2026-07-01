@@ -109,7 +109,18 @@ $(document).ready(function () {
 
        const lector = new FileReader();
        lector.onload = function (event) {
-         $('#cropImage').attr('src', event.target.result);
+         if (glb_cropper) {
+             glb_cropper.destroy();
+             glb_cropper = null;
+         }
+
+         // Crear imagen en memoria para asegurar que está totalmente cargada antes de instanciar Cropper
+         const img = new Image();
+         img.onload = function () {
+             $('#cropImage').attr('src', event.target.result);
+             initCropper();
+         };
+         img.src = event.target.result;
          
          // Reset sliders
          $('#rangeBrightness').val(100);
@@ -142,13 +153,6 @@ $(document).ready(function () {
            $('#btnBackToUpload').show().removeClass('hidden');
            $('#btnCrop').show().removeClass('hidden');
            $('#modalPhotoTitle').text('Ajustar y Recortar');
-           
-            // Inicializar cropper después de que el DOM se haya renderizado
-            requestAnimationFrame(() => {
-               requestAnimationFrame(() => {
-                  initCropper();
-               });
-            });
        }
    }
 
@@ -164,17 +168,17 @@ $(document).ready(function () {
           }
  
           glb_cropper = new Cropper(document.getElementById('cropImage'), {
-               viewMode: 0,        // Sin restricciones: el cuadro puede salir fuera de la imagen
+               viewMode: 1,            // Restringir el cuadro de recorte dentro de los límites de la imagen
                dragMode: 'move',
-               autoCropArea: 1,
-                restore: false,
-                aspectRatio: 1,      // Forzar recorte cuadrado 1:1 (requerido por Active Directory)
-                zoomOnWheel: true,
+               aspectRatio: 1,         // Relación de aspecto 1:1 fija para avatares
+               autoCropArea: 0.9,      // Iniciar el cuadro al 90% del tamaño de la imagen
+               restore: false,
+               zoomOnWheel: true,
                cropBoxMovable: true,
                cropBoxResizable: true,
-                ready: function() {
-                     updateFilters();
-                }
+               ready: function() {
+                    updateFilters();
+               }
           });
        } catch (err) {
           console.error("Excepción en initCropper:", err);
@@ -187,6 +191,7 @@ $(document).ready(function () {
            glb_cropper.destroy();
            glb_cropper = null;
        }
+       $('#cropImage').attr('src', '').off('load');
        $('#txtPhoto').val('');
    }
 
