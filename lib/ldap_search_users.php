@@ -148,6 +148,12 @@ foreach ($search_bases as $base_dn) {
 }
 
 ldap_unbind($ldap_conn);
+
+// Sort results alphabetically by display name
+uasort($results, function($a, $b) {
+    return strcasecmp($a['name'], $b['name']);
+});
+
 if ($app_debug) {
     error_log('ldap_search_users: Success. Found ' . count($results) . ' results.');
 }
