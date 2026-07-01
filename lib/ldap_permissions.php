@@ -5,6 +5,8 @@
 
 require_once(__DIR__ . '/../private/config.php');
 
+use LDAP\Client;
+
 /**
  * Comprueba si un usuario puede editar a otro basándose en la jerarquía (manager)
  * @param mixed $ldap_conn Conexión LDAP activa
@@ -117,9 +119,7 @@ function is_admin_user() {
  * @param mixed $ldap_conn Conexión LDAP opcional para reutilizar
  * @return bool
  */
-function can_edit_contact($dn, $ldap_conn = null) {
-    global $ldap_protocol, $ldap_host, $ldap_port, $ldap_admuser, $ldap_admpwd, $ldap_domain;
-    
+function can_edit_contact($dn, $ldap_conn = null, ?Client $ldap = null) {
     // 0. Si es administrador, tiene permiso siempre
     if (is_admin_user()) return true;
 
@@ -135,32 +135,13 @@ function can_edit_contact($dn, $ldap_conn = null) {
         return false;
     }
 
-    $should_close = false;
     if (!$ldap_conn) {
-        $ldap_conn = @ldap_connect(get_ldap_uri());
+        // Conexión vía Client inyectado (admin bind)
+        $client = $ldap ?? Client::factory();
+        $ldap_conn = $client->getResource();
         if (!$ldap_conn) return false;
-
-        @ldap_set_option($ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3);
-        @ldap_set_option($ldap_conn, LDAP_OPT_REFERRALS, 0);
-
-        // Bind administrativo para consultar el manager
-        $bind_user = $ldap_admuser;
-        if (strpos($bind_user, '=') === false && strpos($bind_user, '@') === false) {
-            $bind_user .= '@' . ($ldap_domain[1] ?? $ldap_host);
-        }
-        
-        if (!@ldap_bind($ldap_conn, $bind_user, $ldap_admpwd)) {
-            ldap_unbind($ldap_conn);
-            return false;
-        }
-        $should_close = true;
     }
     
     // Usamos la lógica jerárquica existente
-    $success = is_in_manager_chain($ldap_conn, $current_user_dn, $dn);
-
-    if ($should_close) {
-        ldap_unbind($ldap_conn);
-    }
-    return $success;
+    return is_in_manager_chain($ldap_conn, $current_user_dn, $dn);
 }
