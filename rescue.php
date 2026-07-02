@@ -43,8 +43,10 @@ $allowed_ip = ipAllowed($client_ip);
 include_once('./lib/preventvalidpost.php');
 
 //Generar un token CSRF único si no existe
-$csrf_token = bin2hex(random_bytes(32));
-$_SESSION['csrf_token'] = $csrf_token;
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+$csrf_token = $_SESSION['csrf_token'];
 ?>
 
 <!DOCTYPE html>

@@ -46,9 +46,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         if (isset($_POST['txtUserNewPwd'])) {
             changePassword($user_to_change, $old_pwd_to_change, $_POST['txtUserNewPwd'], $_POST['txtUserNewRtPwd'], $is_recovery);
+            // Clean plaintext password from session immediately after use
+            unset($_SESSION['userpass']);
             
             if ($_SESSION['mensaje_css'] == 'yes') {
-                unset($_SESSION['username'], $_SESSION['userpass'], $_SESSION['password_just_reset']);
+                unset($_SESSION['username'], $_SESSION['password_just_reset']);
                 // Cierre de sesión: eliminamos variable de autenticación
                 unset($_SESSION['ldap_user']);
                 
@@ -99,8 +101,10 @@ $client_ip = getIP();
 $allowed_ip = ipAllowed($client_ip);
 
 //Generar un token CSRF único si no existe
-$csrf_token = bin2hex(random_bytes(32));
-$_SESSION['csrf_token'] = $csrf_token;
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+$csrf_token = $_SESSION['csrf_token'];
 ?>
 
 <!DOCTYPE html>
