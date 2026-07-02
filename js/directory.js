@@ -58,6 +58,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let activeTrigger = null;
 
     document.addEventListener('mouseenter', function(e) {
+        if (!e.target || typeof e.target.closest !== 'function') return;
         const el = e.target.closest('[data-html-tooltip]');
         if (!el) return;
         activeTrigger = el;
@@ -69,6 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }, true);
 
     document.addEventListener('mouseleave', function(e) {
+        if (!e.target || typeof e.target.closest !== 'function') return;
         const el = e.target.closest('[data-html-tooltip]');
         if (el && el === activeTrigger) {
             tip.style.display = 'none';

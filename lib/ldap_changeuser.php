@@ -10,7 +10,7 @@ if (!defined('DS')) {
 }
 
 function update_ldap_data($user_dn, ?Client $ldap = null) {
-   global $ldap_admuser, $app_debug;
+   global $ldap_protocol, $ldap_host, $ldap_port, $ldap_domain, $ldap_dn, $ldap_user, $ldap_pass, $ldap_admuser, $ldap_admpwd, $app_debug;
 
    $message = array();
    $message_success = '';

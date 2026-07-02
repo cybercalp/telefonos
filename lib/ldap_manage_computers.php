@@ -67,7 +67,7 @@ if ($action === 'search') {
     }
 
     $q_escaped = ldap_escape($query, '', LDAP_ESCAPE_FILTER);
-    $filter = "(&(objectClass=computer)(|(cn=*$q_escaped*)(location=*$q_escaped*)(description=*$q_escaped*)))";
+    $filter = "(&(objectClass=computer)(|(cn=*$q_escaped*)(location=*$q_escaped*)(description=*$q_escaped*)(telephonenumber=*$q_escaped*)))";
     $attrs = ['cn', 'distinguishedname', 'telephonenumber', 'description', 'operatingsystem', 'location'];
 
     $sr = @ldap_search($ldap_conn, $ldap_computers_dn, $filter, $attrs, 0, 30);

@@ -10,8 +10,8 @@
          style="display: none;"
          @keydown.escape.window="isOpen = false">
 
-        <div class="bg-white/95 dark:bg-slate-900/80 max-h-[85vh] rounded-3xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-700 transform transition-all backdrop-blur-xl flex flex-col"
-             style="width: 60%; min-width: 700px; max-width: 1400px;"
+        <div class="bg-white/95 dark:bg-slate-900/80 rounded-3xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-700 transform transition-all backdrop-blur-xl flex flex-col"
+             style="width: 1000px !important; height: 750px !important; max-width: 95vw !important; max-height: 90vh !important;"
              @click.away="isOpen = false"
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="scale-95 translate-y-4"
@@ -134,7 +134,7 @@
                     </div>
 
                     <!-- Right: Edit panel -->
-                    <div class="border-l border-slate-200 dark:border-slate-700/50 px-6" style="flex: 0 0 25%; max-width: 25%;">
+                    <div class="border-l border-slate-200 dark:border-slate-700/50 px-6" style="flex: 0 0 30%; max-width: 30%;">
                         <h4 class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-4 flex items-center justify-center gap-1.5">
                             <i class="fas fa-edit opacity-60"></i> Editar extensión
                         </h4>

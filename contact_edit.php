@@ -130,7 +130,7 @@ $sw4 = $wValue[3];
     </script>
     <script defer nonce="<?= $csp_nonce ?>" src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js" integrity="sha384-Rpe/8orFUm5Q1GplYBHxbuA8Az8O8C5sAoOsdbRWkqPjKFaxPgGZipj4zeHL7lxX" crossorigin="anonymous"></script>
     <script nonce="<?= $csp_nonce ?>">document.addEventListener('DOMContentLoaded',function(){if(typeof Alpine==='undefined'){var s=document.createElement('script');s.src='js/vendor/alpine@3.13.3.min.js';s.defer=!0;document.head.appendChild(s)}})</script>
-    <link href="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.css" rel="stylesheet" integrity="sha384-oMy41mb/qJnpJlpXOF57hSu2KGi47l/UV9+tPNrBOs7/ap5Vubj/3phrCtjutHMQ" crossorigin="anonymous" onerror="this.onerror=null;this.href='css/vendor/cropper@1.5.13.min.css'">
+    <link rel="stylesheet" href="css/vendor/cropper@1.5.13.min.css">
 
     <style nonce="<?= $csp_nonce ?>">
         .bg-gradient-animate {
@@ -650,10 +650,8 @@ $sw4 = $wValue[3];
     </div>
 
     <!-- Scripts -->
-    <script nonce="<?= $csp_nonce ?>" src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <script nonce="<?= $csp_nonce ?>">window.jQuery||document.write('\x3Cscript src="js/vendor/jquery@3.7.1.min.js">\x3C/script>')</script>
-    <script nonce="<?= $csp_nonce ?>" src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js" integrity="sha384-r+ljwOAhwY4/kdyzMnuBg7MEVoWpTMp5EYUDntB/E9qzNwL9dAEcNrb2XaV+mJc2" crossorigin="anonymous"></script>
-    <script nonce="<?= $csp_nonce ?>">window.Cropper||document.write('\x3Cscript src="js/vendor/cropper@1.5.13.min.js">\x3C/script>')</script>
+    <script nonce="<?= $csp_nonce ?>" src="js/vendor/jquery@3.7.1.min.js"></script>
+    <script nonce="<?= $csp_nonce ?>" src="js/vendor/cropper@1.5.13.min.js"></script>
     <script nonce="<?= $csp_nonce ?>" src="js/file.js?v=<?php echo filemtime(__DIR__ . '/js/file.js'); ?>"></script>
 </body>
 

@@ -2,7 +2,6 @@
  * Alpine.js component for managing computer phone extensions.
  * Admin-only modal accessible from the navbar.
  */
-
 document.addEventListener('alpine:init', () => {
     Alpine.data('computerPhoneModal', () => ({
         isOpen: false,

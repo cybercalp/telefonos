@@ -79,8 +79,8 @@ class Client
         if (empty($host)) {
             throw new \RuntimeException('Could not resolve LDAP host from get_ldap_uri()');
         }
-        if (empty($GLOBALS['ldap_dn'])) {
-            throw new \RuntimeException('Missing required config: ldap_dn');
+        if (empty($GLOBALS['ldap_admuser'])) {
+            throw new \RuntimeException('Missing required config: ldap_admuser');
         }
         if (empty($GLOBALS['ldap_admpwd'])) {
             throw new \RuntimeException('Missing required config: ldap_admpwd');
@@ -89,7 +89,7 @@ class Client
         return new self(
             $host,
             (int) $port,
-            $GLOBALS['ldap_dn'],
+            $GLOBALS['ldap_admuser'],
             $GLOBALS['ldap_admpwd'],
             $scheme
         );
