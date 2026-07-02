@@ -27,6 +27,9 @@ if (isset($_GET['from']) && !empty($_GET['from'])) {
     exit;
 }
 
+// Prevenir acceso sin POST válido y comprobar si la IP está bloqueada
+include_once(__DIR__ . '/lib/preventvalidpost.php');
+
 // === LOGICA DE POST ===
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_SESSION['csrf_token_ok']) && $_SESSION['csrf_token_ok'] === true) {
@@ -94,9 +97,6 @@ if ((isset($_SESSION['username'])) && (!empty($_SESSION['username']))) {
 $client_ip = getIP();
 //Buscamos si es una IP permitida
 $allowed_ip = ipAllowed($client_ip);
-
-// Prevenir acceso sin POST válido  y comprobar si la IP está bloqueada
-include_once(__DIR__ . '/lib/preventvalidpost.php');
 
 //Generar un token CSRF único si no existe
 $csrf_token = bin2hex(random_bytes(32));
